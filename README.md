@@ -13,7 +13,7 @@
 
 
 # Screenshots
-![image](https://github.com/Lassebq/dots/assets/68742864/6020ebd2-17fc-4e99-95d0-0010649dd6c9)
+![image](https://github.com/Lassebq/dots/assets/68742864/a6d95a5c-5157-454f-807a-cdf113e0ce4b)
 ![image](https://github.com/Lassebq/dots/assets/68742864/72b97f44-e51d-4f06-9b02-302fe5ed401e)
 ![image](https://github.com/Lassebq/dots/assets/68742864/8964348d-7975-4b76-9768-3f18ad4648a1)
 ![image](https://github.com/Lassebq/dots/assets/68742864/ae7165e1-2eb3-48fb-ad6b-11e42737e455)
