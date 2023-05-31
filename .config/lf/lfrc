@@ -1,0 +1,32 @@
+# █   █▀ █▀▄ ▄▀▀
+# █▄▄ █▀ █▀▄ ▀▄▄
+
+set promptfmt "\033[48;2;17;17;27;38;2;137;180;250m  󰉋 \033[1;38;2;187;195;223m%w\033[0m\033[38;2;17;17;27m \033[0m"
+set cursorpreviewfmt "\033[7;1m"
+
+set shell sh
+set shellopts '-eu'
+set ifs "\n"
+set icons
+set hidden
+set scrolloff 5
+set ratios 1:3
+set info size
+set mouse
+
+set previewer ~/.config/lf/previewer
+set cleaner ~/.config/lf/cleaner
+
+map <delete> $trash-put $fx
+map <enter> :shell
+map <c-s> :calcdirsize
+map <c-c> :copy
+map <c-v> :paste
+map <c-x> :cut
+map <f-2> :rename
+map <f-5> :reload
+map . :set hidden!
+map ` !true
+map <esc> :{{unselect; clear;}}
+
+cmd open $~/.config/lf/opener $f
