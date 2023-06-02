@@ -1,10 +1,15 @@
+# Append ~/.local/bin/ to PATH
+typeset -U path PATH
+path=(~/.local/bin $path)
+export PATH
+
 export TERMINAL=kitty
 export EDITOR=nvim
 export PAGER=bat
 export MANPAGER="sh -c 'col -bx | bat -l man -p'"
 export GPG_TTY=$(tty)
 
-#XDG Base directories
+# XDG Base directories
 export XDG_CONFIG_HOME="$HOME"/.config
 export XDG_CACHE_HOME="$HOME"/.cache
 export XDG_DATA_HOME="$HOME"/.local/share
@@ -12,6 +17,8 @@ export XDG_STATE_HOME="$HOME"/.local/state
 
 export HISTSIZE=100
 export SAVEHIST=100
+
+export MPD_HOST=/var/run/mpd/socket
 
 export QT_QPA_PLATFORMTHEME=gtk2
 export WINEPREFIX="$XDG_DATA_HOME"/wineprefixes/default

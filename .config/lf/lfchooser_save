@@ -1,0 +1,10 @@
+# lfchooser
+
+source "~/.config/lf/lfrc"
+map <enter> ${{
+    read -p "Enter filename: " s
+    if [ -n $s ]; then
+        echo $(realpath $(dirname "$f")/"$s")
+    fi
+    lf -remote "send $id :quit"
+}}

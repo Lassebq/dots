@@ -28,6 +28,7 @@
         "battery",
         //"pulseaudio#microphone",
         "hyprland/language",
+        "idle_inhibitor",
         "pulseaudio",
         "tray",
         "custom/updates",
@@ -48,6 +49,17 @@
         "on-click": "hyprctl switchxkblayout sem-usb-keyboard next"
     },
 
+    "idle_inhibitor": {
+        //"format": "{icon}",
+        //"format-icons": {
+        //    "activated": "",
+        //    "deactivated": ""
+        //}
+        "tooltip-format-activated": "Caffeine: ON",
+        "tooltip-format-deactivated": "Caffeine: OFF",
+        "format": ""
+    },
+
     "custom/separator_l": {
         "format": ""
     },
@@ -58,7 +70,7 @@
 
     "custom/launch": {
         "format": "",
-        "on-click": "rofi -show drun",
+        "on-click": "~/.config/rofi/rofitoggle",
         "tooltip": false
     },
 

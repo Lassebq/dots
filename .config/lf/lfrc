@@ -30,3 +30,14 @@ map ` !true
 map <esc> :{{unselect; clear;}}
 
 cmd open $~/.config/lf/opener $f
+
+# Using shell-pipe because with shell it "flickers"
+cmd mkexec %{{
+    if [ -x $f ];
+        then chmod -x $f
+        else chmod +x $f
+    fi
+    lf -remote "send $id :reload"
+}}
+
+map <c-l> :mkexec

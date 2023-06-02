@@ -1,0 +1,4 @@
+# lfchooser
+
+source "~/.config/lf/lfrc"
+map <enter> ${{echo $fx; lf -remote "send $id :quit";}}
