@@ -41,6 +41,9 @@ fi
 # cd to parent directory
 cd "$(dirname "$path")"
 
+basename="$(basename "$path")"
+export basename
+
 "$termcmd" sh -c "$cmd $args > $out"
 #if [ "$save" = "1" ] && [ ! -s "$out" ]; then
 #    rm "$path"

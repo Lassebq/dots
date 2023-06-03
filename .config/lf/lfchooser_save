@@ -2,9 +2,14 @@
 
 source "~/.config/lf/lfrc"
 map <enter> ${{
-    read -p "Enter filename: " s
-    if [ -n $s ]; then
-        echo $(realpath $(dirname "$f")/"$s")
+    filenamemsg="Enter filename: "
+    if [ -n "$basename" ]; then
+        filenamemsg="Enter filename [$basename]: "
+    fi
+    read -p "$filenamemsg" s
+    n="${s:-$basename}"
+    if [ -n "$n" ]; then
+        echo $(realpath $(pwd))/"$n"
     fi
     lf -remote "send $id :quit"
 }}
