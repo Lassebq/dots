@@ -179,7 +179,7 @@ if (( ${#installpkgs[@]} )) || (( ${#makeyay[@]} )); then
     y_or_n || (echo "Cannot proceed without necessary packages!"; exit)
     sudo pacman -Syy || ( echo "Could not update database!"; exit)
     if (( ${#makeyay[@]} )); then
-        sudo pacman -S "${makeyay[@]}"
+        sudo pacman -S --noconfirm "${makeyay[@]}"
     fi
     if ! pkg_installed "yay"; then
         tempdir=$(mktemp -d)
