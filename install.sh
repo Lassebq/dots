@@ -293,14 +293,20 @@ if (( ${#installpkgs[@]} )); then
     read -r string
     IFS=' ' read -r -a exclude <<< "$string"
     
+
+    i=1
     for pkg in "${installpkgs[@]}"; do
-        i=1
+        excluded=false
         for n in "${exclude[@]}"
-        do
-            if [ ! "$i" -eq "$n" ] ; then
-                installpkgs2+=("$pkg")
+        do 
+            if [ "$i" -eq "$n" ]; then
+                excluded=true
+                break
             fi
         done
+        if [ "$excluded" = false ]; then
+            installpkgs2+=("$pkg")
+        fi
         i=$((i+1))
     done
     yay -S --noconfirm "${installpkgs2[@]}"
