@@ -59,8 +59,10 @@ if [ -z "$XDG_DATA_HOME" ]; then
 fi
 
 set_nvim_theme() {
-    ls $XDG_RUNTIME_DIR/nvim.*.0 \
-	    | xargs -I {} nvim --server {} --remote-send "<cmd>colorscheme $1<CR>" > /dev/null
+    if pidof nvim; then
+        ls $XDG_RUNTIME_DIR/nvim.*.0 \
+            | xargs -I {} nvim --server {} --remote-send "<cmd>colorscheme $1<CR>" > /dev/null
+    fi
     echo "vim.cmd.colorscheme \"$1\"" > "$XDG_CONFIG_HOME/nvim/lua/theme.lua"
 }
 
@@ -117,11 +119,11 @@ if [ -f "$themepath/theme" ]; then
         ln -sdfT "/usr/share/themes/$GTK_THEME/gtk-4.0" "$XDG_CONFIG_HOME/gtk-4.0"
     fi
 
-    if conf=$(jq ".[\"workbench.colorTheme\"] = \"$VSCODE_THEME\"" "$XDG_CONFIG_HOME/Code - OSS/User/settings.json"); then
+    if [ -f "$XDG_CONFIG_HOME/Code - OSS/User/settings.json" ] && conf=$(jq ".[\"workbench.colorTheme\"] = \"$VSCODE_THEME\"" "$XDG_CONFIG_HOME/Code - OSS/User/settings.json"); then
         echo "$conf" > "$XDG_CONFIG_HOME/Code - OSS/User/settings.json"
     fi
     
-    if conf=$(jq ".[\"workbench.colorTheme\"] = \"$VSCODE_THEME\"" "$XDG_CONFIG_HOME/Code/User/settings.json"); then
+    if [ -f "$XDG_CONFIG_HOME/Code/User/settings.json" ] && conf=$(jq ".[\"workbench.colorTheme\"] = \"$VSCODE_THEME\"" "$XDG_CONFIG_HOME/Code/User/settings.json"); then
         echo "$conf" > "$XDG_CONFIG_HOME/Code/User/settings.json"
     fi
     

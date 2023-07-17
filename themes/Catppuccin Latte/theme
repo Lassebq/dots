@@ -2,5 +2,5 @@
 
 NVIM_THEME="catppuccin-latte"
 VSCODE_THEME="Catppuccin Latte"
-GTK_THEME=Catppuccin-Latte-Standard-Blue-Light
+GTK_THEME=Catppuccin-Latte-Standard-Blue-light
 COLOR_SCHEME=default

@@ -1,6 +1,8 @@
 #!/bin/bash
 
 preppackages=(
+"unzip"
+"jq"
 "base-devel"
 "git"
 )
