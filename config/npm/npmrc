@@ -1,0 +1,5 @@
+prefix=/home/lassebq/.local/share/npm
+cache=/home/lassebq/.cache/npm
+init-module=/home/lassebq/.config/npm/config/npm-init.js
+scripts-prepend-node-path=true
+node_gyp=

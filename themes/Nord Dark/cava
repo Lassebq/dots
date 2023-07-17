@@ -1,0 +1,16 @@
+[color]
+gradient = 1
+
+# Frost
+gradient_count = 4
+gradient_color_1 = '#8FBCBB'
+gradient_color_2 = '#88C0D0'
+gradient_color_3 = '#81A1C1'
+gradient_color_4 = '#5E81AC'
+
+# Aurora
+#gradient_count = 4
+#gradient_color_1 = '#A3BE8C'
+#gradient_color_2 = '#EBCB8B'
+#gradient_color_3 = '#D08770'
+#gradient_color_4 = '#BF616A'

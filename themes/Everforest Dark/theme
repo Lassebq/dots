@@ -1,0 +1,6 @@
+#!/bin/bash
+
+NVIM_THEME=everforest
+VSCODE_THEME="Everforest Dark"
+GTK_THEME="Everforest-Dark-Borderless"
+COLOR_SCHEME=default

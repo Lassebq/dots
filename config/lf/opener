@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+file=$1
+
+decompile() {
+    java -jar /usr/share/java/cfr/cfr.jar "$1" | bat --language=java --color=always --paging=always --decorations=never
+}
+
+mime=$(file -Lb --mime-type "$file")
+if [[ "$mime" =~ ^image ]]; then
+    kitty +kitten icat --silent --stdin no --transfer-mode file "$file" < /dev/null > /dev/tty
+    read -rsn1
+    exit 0
+fi
+
+if [[ "$mime" =~ ^text || "$mime" = application/json || "$mime" = application/x-ndjson || "$mime" = inode/x-empty ]]; then
+    $EDITOR "$file"
+    exit 0
+fi
+
+if [[ "$mime" = application/octet-stream ]]; then
+    $EDITOR "$file"
+    exit 0
+fi
+
+if [[ "$mime" = application/x-java-applet ]]; then
+    decompile "$file"
+    exit 0
+fi
+
+xdg-open "$file"
+exit 0

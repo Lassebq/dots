@@ -1,0 +1,6 @@
+# Property Name             Border  BG      Text    Indicator Child-border
+client.focused              #11111b #1e1e2e #89dceb #89dceb   #89dceb
+client.focused_inactive     #1e1e2e #1e1e2e #cdd6f4 #1e1e2e   #1e1e2e
+client.unfocused            #1e1e2e #1e1e2e #cdd6f4 #1e1e2e   #1e1e2e
+client.urgent               #1e1e2e #1e1e2e #cdd6f4 #1e1e2e   #1e1e2e
+client.placeholder          #1e1e2e #1e1e2e #cdd6f4 #1e1e2e   #1e1e2e

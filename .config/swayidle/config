@@ -1,3 +1,0 @@
-timeout 180 "hyprctl dispatch dpms off" resume "hyprctl dispatch dpms on"
-timeout 300 "systemctl suspend"
-after-resume "hyprctl dispatch dpms on & gtklock"

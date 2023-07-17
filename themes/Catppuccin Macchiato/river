@@ -1,0 +1,5 @@
+#!/bin/sh
+
+riverctl background-color 0x181926
+riverctl border-color-focused 0x91d7e3
+riverctl border-color-unfocused 0x24273a

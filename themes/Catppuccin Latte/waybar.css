@@ -1,0 +1,13 @@
+@define-color base #eff1f5;
+@define-color background alpha(#dce0e8, 1);
+@define-color background_alt alpha(@base, 1);
+@define-color text #4c4f69;
+@define-color workspace_inactive #9ca0b0;
+@define-color workspace_active @text;
+@define-color shadow rgba(0, 0, 0, 0);
+@define-color glow rgba(0, 0, 0, 0);
+@define-color text_alt #04a5e5;
+@define-color media_player #8839ef;
+@define-color monitor_resources #209fb5;
+@define-color idle_inhibit #fe640b;
+@define-color urgent #40a02b;

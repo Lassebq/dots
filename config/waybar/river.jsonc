@@ -1,0 +1,39 @@
+{
+    "layer": "top",
+    "position": "top",
+    "mod": "dock",
+    "exclusive": true,
+    "passthrough": false,
+    "gtk-layer-shell": true,
+    "height": 20,
+    "modules-left": [
+        "custom/launch",
+        "river/tags",
+        "custom/separator_r",
+        "custom/media_previous",
+        "custom/media_play",
+        "custom/media_next",
+        "custom/media"
+    ],
+    "modules-center": [
+        "custom/separator_l",
+        "river/window",
+        "custom/separator_r"
+    ],
+    "modules-right": [
+        "cpu",
+        "memory",
+        "disk",
+        "custom/separator_l",
+        "battery",
+        "idle_inhibitor",
+        "pulseaudio",
+        "tray", // Tray is broken in -git
+        "custom/updates",
+        "custom/weather",
+        "clock",
+        "custom/power_btn"
+    ],
+
+    "include": ["$XDG_CONFIG_HOME/waybar/modules.jsonc"] // Include the module config
+}

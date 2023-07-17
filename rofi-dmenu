@@ -1,0 +1,12 @@
+#!/bin/sh
+parent_path=$( cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P )
+cd "$parent_path"
+
+
+selected_theme="$(ls themes | rofi -p "Choose a theme" -i -dmenu)"
+
+if [ -z "$selected_theme" ]; then
+    exit 0;
+fi
+
+./change-theme.sh "$selected_theme"

@@ -1,0 +1,19 @@
+.background {
+    background-color: alpha(#000, 0.5);
+}
+
+#window-box {
+    padding: 40px 64px;
+    border: 2px solid @theme_selected_bg_color;
+    border-radius: 10px;
+    box-shadow: @theme_selected_bg_color 0px 0px 12px;
+    background-color: @theme_bg_color;
+}
+
+#clock-label {
+    font-size: 80px; 
+}
+
+#input-label {
+    font-size: 0;
+}

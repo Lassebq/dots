@@ -1,0 +1,13 @@
+* {
+    foreground: #CDD6F4;
+    background: #1e1e2ecc;
+    active-background: #89dceb;
+    urgent-background: #a6e3a1;
+
+    selected-background: @active-background;
+    selected-foreground: #1e1e2e;
+    selected-urgent-background: @urgent-background;
+    selected-active-background: @active-background;
+    separatorcolor: @active-background;
+    bordercolor: @active-background;
+}

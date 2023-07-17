@@ -1,0 +1,50 @@
+#!/usr/bin/env bash
+file=$1
+w=$2
+h=$3
+x=$4
+y=$5
+
+CACHE="$HOME/.cache/lf/thumbnail.$(stat --printf '%n\0%i\0%F\0%s\0%W\0%Y' \
+	-- "$(readlink -f "$1")" | sha256sum | awk '{print $1}'))"
+
+mime=$(file -Lb --mime-type "$file")
+
+
+decompile() {
+    java -jar /usr/share/java/cfr/cfr.jar --comments false "$1"
+}
+
+image() {
+    kitty +kitten icat --silent --stdin no --transfer-mode file --place "${2}x${3}@${4}x${5}" "$1" < /dev/null > /dev/tty
+}
+
+case "$file" in 
+    *.avi|*.mp4|*.wmv|*.dat|*.3gp|*.ogv|*.mkv|*.mpg|*.mpeg|*.vob|*.fl[icv]|*.m2v|*.mov|*.webm|*.ts|*.mts|*.m4v|*.r[am]|*.qt|*.divx)
+    [ ! -f "${CACHE}.jpg" ] && ffmpegthumbnailer -i "$1" -o "${CACHE}.jpg" -s 0 -q 5
+    image "${CACHE}.jpg" "$w" "$h" "$x" "$y"
+    exit 1;
+esac
+
+if [[ "$mime" =~ ^image ]]; then
+    image "$file" "$w" "$h" "$x" "$y"
+    exit 1
+fi
+
+if [[ "$mime" =~ ^text || "$mime" = application/json || "$mime" = application/x-ndjson ]]; then
+    bat --color=always --paging=never --decorations=never "$file"
+    exit 0
+fi
+
+if [[ "$mime" = application/x-java-applet ]]; then
+    [ ! -f "${CACHE}.java" ] && decompile "$file" > "${CACHE}.java"
+    bat --color=always --paging=never --decorations=never --language=java "${CACHE}.java"
+    exit 0
+fi
+
+if [[ "$mime" = inode/x-empty ]]; then
+    printf "\033[7mempty\033[0m"
+    exit 0
+fi
+
+file "$file"

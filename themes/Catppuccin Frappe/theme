@@ -1,0 +1,6 @@
+#!/bin/bash
+
+NVIM_THEME="catppuccin-frappe"
+VSCODE_THEME="Catppuccin Frappé"
+GTK_THEME=Catppuccin-Frappe-Standard-Sky-dark
+COLOR_SCHEME=default

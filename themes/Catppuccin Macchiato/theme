@@ -1,0 +1,6 @@
+#!/bin/bash
+
+NVIM_THEME="catppuccin-macchiato"
+VSCODE_THEME="Catppuccin Macchiato"
+GTK_THEME=Catppuccin-Macchiato-Standard-Sky-dark
+COLOR_SCHEME=default

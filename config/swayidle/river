@@ -1,0 +1,3 @@
+timeout 180 'wlopm --off "*"' resume 'wlopm --on "*"'
+timeout 300 "systemctl suspend"
+after-resume 'wlopm --on "*"'

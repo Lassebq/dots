@@ -1,0 +1,6 @@
+#!/bin/bash
+
+NVIM_THEME=nord
+VSCODE_THEME=Nord
+GTK_THEME=Nordic
+COLOR_SCHEME=default

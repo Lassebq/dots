@@ -1,0 +1,16 @@
+[global]
+frame_color = "#8caaee"
+separator_color= frame
+background = "#303446"
+foreground = "#c6d0f5"
+font = JetBrainsMono NF 12
+width = 400
+corner_radius = 6
+offset = 10x10
+
+[urgency_low]
+
+[urgency_normal]
+
+[urgency_critical]
+frame_color = "#ef9f76"

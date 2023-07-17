@@ -1,0 +1,6 @@
+#!/bin/bash
+
+NVIM_THEME=tokyonight-night
+VSCODE_THEME="Tokyo Night"
+GTK_THEME=Tokyonight-Dark-B-LB
+COLOR_SCHEME=default
