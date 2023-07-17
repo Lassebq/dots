@@ -51,11 +51,11 @@ if [ -z "$XDG_CONFIG_HOME" ]; then
 fi
 
 if [ -z "$XDG_CACHE_HOME" ]; then
-    XDG_CONFIG_HOME=~/.cache
+    XDG_CACHE_HOME=~/.cache
 fi
 
 if [ -z "$XDG_DATA_HOME" ]; then
-    XDG_CONFIG_HOME=~/.local/share
+    XDG_DATA_HOME=~/.local/share
 fi
 
 set_nvim_theme() {
