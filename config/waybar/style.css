@@ -152,7 +152,7 @@ tooltip {
     color: @monitor_resources;
 }
 
-#custom-media,
+#mpris,
 #custom-media_play,
 #custom-media_next,
 #custom-media_previous {
@@ -160,7 +160,7 @@ tooltip {
     border-top: solid @media_player 3px;
 }
 
-#custom-media {
+#mpris {
     margin-right: 10px;
     color: @media_player;
 }

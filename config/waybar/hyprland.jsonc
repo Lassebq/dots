@@ -29,7 +29,7 @@
         "hyprland/language",
         "idle_inhibitor",
         "pulseaudio",
-        "tray", // Tray is broken in -git
+        "tray", //Tray is broken in -git
         "custom/updates",
         "custom/weather",
         "custom/notification",

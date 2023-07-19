@@ -3,5 +3,5 @@
 dbus-update-activation-environment --systemd DISPLAY WAYLAND_DISPLAY SWAYSOCK XDG_CURRENT_DESKTOP
 waybar -c ~/.config/waybar/river.jsonc >/dev/null 2>&1 &
 swww init
-pkill -x swayidle; swayidle &
+pkill -x swayidle; swayidle -C ~/.config/swayidle/river &
 

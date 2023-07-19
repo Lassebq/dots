@@ -92,11 +92,13 @@
     },
 
     "custom/separator_l": {
-        "format": ""
+        "format": "",
+        "tooltip": false
     },
 
     "custom/separator_r": {
-        "format": ""
+        "format": "",
+        "tooltip": false
     },
 
     "custom/launch": {
@@ -165,9 +167,10 @@
     "custom/media_play": {
         "format": "{}",
         "tooltip": false,
-        "return-type": "json",
         "on-click": "playerctl play-pause",
-        "exec": "~/.config/waybar/scripts/mediaplayer.py -b 2> /dev/null"
+        "return-type": "json",
+        "exec-on-event": false,
+        "exec": "~/.config/waybar/scripts/play-pause"
     },
 
     "custom/media_next": {
@@ -182,19 +185,11 @@
         "on-click": "playerctl previous"
     },
 
-    "custom/media": {
-        "format": "{}",
-        "return-type": "json",
+    "mpris": {
+        "format": "{title}",
         "max-length": 32,
-        "escape": true,
-        //"format-icons": {
-        //    "default": " "
-        //},
         "on-click": "playerctl play-pause",
-        "on-click-right": "$TERMINAL --title ncmpcpp sh -c 'ncmpcpp'",
-        //"on-click-forward": "playerctl next",
-        //"on-click-backward": "playerctl previous",
-        "exec": "~/.config/waybar/scripts/mediaplayer.py 2> /dev/null"
+        "on-click-right": "$TERMINAL --title ncmpcpp sh -c 'ncmpcpp'"
     },
 
     "tray": {

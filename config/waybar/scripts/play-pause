@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+#         
+
+getstatus() {
+    status=$(playerctl status)
+
+    if [ "$status" = "Playing" ]; then
+        echo " "
+    elif [ "$status" = "Paused" ]; then
+        echo " "
+    else
+        echo " "
+    fi
+}
+
+dbus-monitor path='/org/mpris/MediaPlayer2',interface='org.freedesktop.DBus.Properties',member='PropertiesChanged' --profile |
+  while read -r _; do
+    printf '{"text": "%s"}\n' "$(getstatus)"
+  done
+exit 0;

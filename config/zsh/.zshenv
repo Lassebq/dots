@@ -14,7 +14,7 @@ fi
 export TERMINAL=kitty
 export EDITOR=nvim
 export PAGER=bat
-export MANPAGER="sh -c 'col -bx | bat -l man -p'"
+export MANPAGER="less -R --use-color -Dd+r -Du+b"
 export GPG_TTY=$(tty)
 
 # XDG Base directories

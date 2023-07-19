@@ -13,7 +13,7 @@
         "custom/media_previous",
         "custom/media_play",
         "custom/media_next",
-        "custom/media"
+        "mpris"
     ],
     "modules-center": [
         "custom/separator_l",
@@ -28,7 +28,7 @@
         "battery",
         "idle_inhibitor",
         "pulseaudio",
-        "tray", // Tray is broken in -git
+        //"tray", Tray is broken in -git
         "custom/updates",
         "custom/weather",
         "clock",
