@@ -13,6 +13,7 @@ lfcd () {
     fi
 }
 
+alias fetch="nitch"
 alias ncmp="ncmpcpp"
 alias lfsu="sudo -E -H lf"
 alias pacman="yay"

@@ -3,7 +3,7 @@
 riverctl map -layout 0 normal Super Q spawn $TERMINAL
 riverctl map -layout 0 normal Super W close
 riverctl map -layout 0 normal Super M spawn ~/.config/wlogout/exec
-riverctl map -layout 0 normal Super E spawn "gtk-launch lf"
+riverctl map -layout 0 normal Super E spawn "gtk-launch nemo"
 riverctl map -layout 0 normal Super A spawn "rofi -show drun"
 riverctl map -layout 0 normal Super R spawn "rofi -show run"
 riverctl map -layout 0 normal Super+Shift T spawn ~/dots/rofi-dmenu
@@ -143,7 +143,7 @@ done
 # Set keyboard repeat rate
 riverctl set-repeat 30 200
 
-riverctl keyboard-layout -options "grp:alt_shift_toggle" us,ru
+riverctl keyboard-layout -options "grp:shift_caps_toggle" us,ru
 
 # Make all views with app-id "bar" and any title use client-side decorations
 riverctl rule-add csd -app-id "bar"

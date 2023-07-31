@@ -8,6 +8,7 @@ preppackages=(
 )
 
 checkpackages=(
+"libadwaita-without-adwaita-git" # https://stopthemingmy.app/ fuck you gnome devs
 "starship"
 "zsh"
 "kitty"
@@ -15,7 +16,6 @@ checkpackages=(
 "slurp"
 "wlogout"
 "wl-clipboard"
-"gtklock"
 "swayidle"
 "pipewire-alsa"
 "pipewire-pulse"
@@ -29,17 +29,19 @@ riverpkgs=(
 "waybar"
 "swww"
 "wlopm"
-#"xdg-desktop-portal-wlr"
+"xdg-desktop-portal-wlr"
 )
 
 swaypkgs=(
+"gtklock"
 "waybar"
 "swaybg"
 "autotiling"
-#"xdg-desktop-portal-wlr"
+"xdg-desktop-portal-wlr"
 )
 
 hyprlandpkgs=(
+"gtklock"
 "waybar-hyprland"
 "swww"
 "xdg-desktop-portal-hyprland"

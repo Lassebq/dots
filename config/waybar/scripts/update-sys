@@ -10,7 +10,7 @@ fi
 
 # Calculate updates for each service
 AUR=$(yay -Qua | wc -l)
-OFFICIAL=$(checkupdates | wc -l)
+OFFICIAL=$(pacman -Qu | wc -l)
 
 # Case/switch for each service updates
 case $1 in

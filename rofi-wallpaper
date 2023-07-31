@@ -1,0 +1,23 @@
+#!/bin/sh
+
+wallpaper_path=$(realpath "$1")
+
+parent_path=$( cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P )
+cd "$parent_path"
+
+list_wallpapers() {
+    for file in "$1"/*
+    do
+        if [[ -f "$file" ]]; then
+            echo -en "$(basename "$file")\0icon\x1f$(realpath "$file")\n"
+        fi
+    done
+}
+
+selected_wallpaper="$(list_wallpapers "$wallpaper_path" | rofi -p "Choose a wallpaper" -i -dmenu -config images.rasi)"
+
+if [ -z "$selected_wallpaper" ]; then
+    exit 0;
+fi
+
+realpath "$1/$selected_wallpaper"

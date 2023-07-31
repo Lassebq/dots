@@ -168,6 +168,7 @@
         "format": "{}",
         "tooltip": false,
         "on-click": "playerctl play-pause",
+        "on-click-right": "$TERMINAL --title ncmpcpp sh -c 'ncmpcpp'",
         "return-type": "json",
         "exec-on-event": false,
         "exec": "~/.config/waybar/scripts/play-pause"
@@ -188,8 +189,7 @@
     "mpris": {
         "format": "{title}",
         "max-length": 32,
-        "on-click": "playerctl play-pause",
-        "on-click-right": "$TERMINAL --title ncmpcpp sh -c 'ncmpcpp'"
+        "on-click": "playerctl play-pause"
     },
 
     "tray": {

@@ -1,12 +1,12 @@
 # My dotfiles
 | Distro: | [Arch](https://archlinux.org)|
 | --- | ----------- |
-| Wayland compositor: | [Hyprland](https://hyprland.org)       |
+| Wayland compositor: | [Hyprland](https://hyprland.org), [River](https://github.com/riverwm/river)       |
 | Bar: | [Waybar](https://github.com/Alexays/Waybar)           |
-| Terminal: | [kitty](https://github.com/kovidgoyal/kitty)     |
+| Terminal: | [kitty](https://github.com/kovidgoyal/kitty), [alacritty](https://github.com/alacritty/alacritty)     |
 | Shell: | [zsh](https://www.zsh.org)                          |
-| Editor: | [Neovim](https://neovim.io)                        |
-| Wallpaper daemon: | [swww](https://github.com/Horus645/swww) |
+| Editor: | [VSCode](https://github.com/microsoft/vscode), [Neovim](https://neovim.io)                        |
+| Wallpaper daemon: | [swaybg](https://github.com/swaywm/swaybg), [swww](https://github.com/Horus645/swww) |
 | App launcher: | [rofi](https://github.com/davatorium/rofi)   |
 | Lock screen: | [gtklock](https://github.com/jovanlanik/gtklock)   |
 | Fetch: | [nitch](https://github.com/ssleert/nitch)   |

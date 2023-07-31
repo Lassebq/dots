@@ -155,15 +155,22 @@ tooltip {
 #mpris,
 #custom-media_play,
 #custom-media_next,
-#custom-media_previous {
+#custom-media_previous,
+#custom-media_volume {
     padding: 0px 10px;
     border-top: solid @media_player 3px;
 }
 
+#custom-media_volume,
 #mpris {
-    margin-right: 10px;
+    padding: 0px 5px;
     color: @media_player;
 }
+
+#custom-media_volume {
+    margin-right: 10px;
+}
+
 #custom-media_previous {
     margin-left: 20px;
 }

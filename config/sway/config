@@ -81,7 +81,7 @@ default_floating_border none
     # Start a terminal
     bindsym $mod+q exec $term
     
-    bindsym $mod+e exec gtk-launch lf
+    bindsym $mod+e exec gtk-launch nemo
 
     # Kill focused window
     bindsym $mod+w kill

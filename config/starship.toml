@@ -3,6 +3,7 @@
 ## ░▀▀▀░░▀░░▀░▀░▀░▀░▀▀▀░▀░▀░▀▀▀░▀░░
 
 # Setups
+command_timeout=1000
 format="$character$directory"
 right_format = """$git_status$git_branch$cmd_duration"""
 add_newline = false 

@@ -66,6 +66,21 @@ set_nvim_theme() {
     echo "vim.cmd.colorscheme \"$1\"" > "$XDG_CONFIG_HOME/nvim/lua/theme.lua"
 }
 
+
+random_wallpaper() {
+    find "$(realpath "$themepath/wallpaper")" -maxdepth 1 -type f | shuf -n 1
+}
+
+select_wallpaper() {
+    ./rofi-wallpaper "$1"
+}
+wallpaper=$(select_wallpaper "$themepath/wallpaper")
+
+if [ -z "$wallpaper" ]; then
+    echo "No wallpaper provided!"
+    exit 1
+fi
+
 echo "Applying theme..."
 
 # Apply sway config changes first to not mess with wallpaper animation
@@ -87,18 +102,17 @@ if [ -f "$themepath/river" ]; then
     fi
 fi
 
-wallpaper=$(find "$(realpath "$themepath/wallpaper")" -maxdepth 1 -type f | shuf -n 1)
 echo "Setting wallpaper: $(basename "$wallpaper")"
 
 if [ -f "$wallpaper" ]; then
     mkdir -p "$XDG_CACHE_HOME"/swaybg
     ln -sf "$wallpaper" "$XDG_CACHE_HOME"/swaybg/img
-    if pidof sway; then
+    if pidof swaybg; then
         echo "Restarting swaybg"
         killall swaybg
         swaybg -m fill -o "*" -i "$wallpaper" >/dev/null 2>&1 &
     elif swww -V > /dev/null 2>&1; then
-        swww img --transition-fps 60 --transition-type wipe "$wallpaper"    
+        swww img --transition-fps=60 --transition-type=wipe "$wallpaper"    
     fi
 fi
 
@@ -112,12 +126,6 @@ if [ -f "$themepath/theme" ]; then
         sed -i -E 's/(gtk-theme-name=")(.*)(")/\1'"$GTK_THEME"'\3/g' "$GTK2_RC_FILES"
     fi
     sed -i -E 's/(gtk-theme-name=)(.*)/\1'"$GTK_THEME"'/g' "$XDG_CONFIG_HOME"/gtk-3.0/settings.ini
-    
-    if [ -d "$XDG_DATA_HOME/themes/$GTK_THEME/gtk-4.0" ]; then
-        ln -sdfT "$XDG_DATA_HOME/themes/$GTK_THEME/gtk-4.0" "$XDG_CONFIG_HOME/gtk-4.0"
-    elif [ -d "/usr/share/themes/$GTK_THEME/gtk-4.0" ]; then
-        ln -sdfT "/usr/share/themes/$GTK_THEME/gtk-4.0" "$XDG_CONFIG_HOME/gtk-4.0"
-    fi
 
     if [ -f "$XDG_CONFIG_HOME/Code - OSS/User/settings.json" ] && conf=$(jq ".[\"workbench.colorTheme\"] = \"$VSCODE_THEME\"" "$XDG_CONFIG_HOME/Code - OSS/User/settings.json"); then
         echo "$conf" > "$XDG_CONFIG_HOME/Code - OSS/User/settings.json"
@@ -157,7 +165,7 @@ if [ -f "$themepath/cava" ]; then
 fi
 
 # bottom
-mkdir -p "$XDG_CONFIG_HOME"/cava
+mkdir -p "$XDG_CONFIG_HOME"/bottom
 if [ -f "$themepath/bottom.toml" ]; then
     cp -f config/bottom/bottom.toml "$XDG_CONFIG_HOME"/bottom/bottom.toml
     cat "$themepath"/bottom.toml >> "$XDG_CONFIG_HOME"/bottom/bottom.toml
@@ -181,6 +189,23 @@ if [ -f "$themepath/waybar.css" ]; then
     echo "Reloading waybar"
     ln -sf "$themepath"/waybar.css "$XDG_CONFIG_HOME"/waybar/colors.css
     pkill -USR2 waybar > /dev/null 2>&1 &
+fi
+
+# TODO read profile path from .mozilla/firefox/profiles.ini
+if [ -d ~/.mozilla/firefox/lassebq/chrome ]; then
+    if [[ "$wallpaper" == *.jpg || "$wallpaper" == *.jpeg ]]; then
+        rm -f ~/.mozilla/firefox/lassebq/chrome/background.png
+        ln -f "$wallpaper" ~/.mozilla/firefox/lassebq/chrome/background.jpg
+    elif [[ "$wallpaper" == *.png ]]; then        
+        rm -f ~/.mozilla/firefox/lassebq/chrome/background.jpg
+        ln -f "$wallpaper" ~/.mozilla/firefox/lassebq/chrome/background.png
+    fi
+fi
+
+# Reload firefox using socket connection script
+if [ -f /tmp/firefox-remote.pid ]; then
+    ln -sf "$themepath/firefox" /tmp/firefox-remote
+    kill -SIGUSR1 "$(cat /tmp/firefox-remote.pid)"
 fi
 
 # btop
@@ -224,7 +249,7 @@ echo "Building bat cache"
 bat cache --build > /dev/null 2>&1
 
 # Also reload lf to update preview with new colors
-if lf -version > /dev/null 2>&1; then
+if pidof lf > /dev/null 2>&1; then
     lf -remote "send :reload"
 fi
 

@@ -92,6 +92,9 @@ configuration {
     background-color: @active-background;
     text-color:       @foreground;
 }
+#element-text {
+    vertical-align: 0.5;
+}
 #scrollbar {
     width:        2px ;
     border:       0;
@@ -103,7 +106,6 @@ configuration {
     border-color: @separatorcolor;
 }
 #button {
-
 }
 #button.selected {
     border-radius: 4px;

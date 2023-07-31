@@ -1,0 +1,25 @@
+@import "~/.config/rofi/config.rasi"
+
+listview {
+    flow: horizontal;
+    lines: 3;
+    columns: 6;
+    fixed-columns: true;
+}
+element {
+    orientation:      vertical;
+    cursor: pointer;
+    padding:          4px;
+}
+
+/** Entry icon */
+element-icon {
+    size: 128px;
+    cursor: inherit;
+}
+
+/** Entry text */
+element-text {
+    horizontal-align: 0.5;
+    cursor: inherit;
+}
