@@ -1,4 +1,4 @@
 timeout 180 'swaymsg "output * dpms off"' resume 'swaymsg "output * dpms on"'
-timeout 300 "loginctl lock-session & systemctl suspend"
+timeout 300 "loginctl lock-session; systemctl suspend"
 after-resume 'swaymsg "output * dpms on"'
 lock "gtklock"

@@ -8,7 +8,7 @@
     "height": 20,
     "modules-left": [
         "custom/launch",
-        "wlr/workspaces",
+        "hyprland/workspaces",
         "custom/separator_r",
         "custom/media_previous",
         "custom/media_play",
@@ -29,7 +29,7 @@
         "hyprland/language",
         "idle_inhibitor",
         "pulseaudio",
-        "tray", //Tray is broken in -git
+        "tray",
         "custom/updates",
         "custom/weather",
         "custom/notification",

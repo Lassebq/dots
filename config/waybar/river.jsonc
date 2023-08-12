@@ -28,7 +28,7 @@
         "battery",
         "idle_inhibitor",
         "pulseaudio",
-        //"tray", Tray is broken in -git
+        "tray",
         "custom/updates",
         "custom/weather",
         "clock",

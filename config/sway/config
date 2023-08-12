@@ -63,7 +63,7 @@ include ~/.config/sway/autostart
 input type:keyboard {
 	xkb_layout us,ru
 	xkb_model pc105
-	xkb_options grp:alt_shift_toggle
+	xkb_options grp:shift_caps_toggle
     repeat_delay 200
     repeat_rate 30
 }

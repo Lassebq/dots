@@ -24,7 +24,7 @@
 }
 {
     "label" : "suspend",
-    "action" : "systemctl suspend",
+    "action" : "sh -c 'loginctl lock-session; systemctl suspend'",
     "text" : "Suspend",
     "keybind" : "u"
 }

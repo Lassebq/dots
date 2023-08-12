@@ -5,7 +5,7 @@ export PATH
 
 if [ "$XDG_SESSION_TYPE" = wayland ]; then
     export LIBVA_DRIVER_NAME=nvidia
-    export GBM_BACKEND=nvidia-drm
+    #export GBM_BACKEND=nvidia-drm
     export __GLX_VENDOR_LIBRARY_NAME=nvidia
     export WLR_NO_HARDWARE_CURSORS=1  
     export MOZ_ENABLE_WAYLAND=1
@@ -29,11 +29,12 @@ export SAVEHIST=100
 export MPD_HOST=/var/run/mpd/socket
 
 export QT_QPA_PLATFORMTHEME=qt5ct
+export PASSWORD_STORE_DIR="$XDG_DATA_HOME"/pass
 export WINEPREFIX="$XDG_DATA_HOME"/wineprefixes/default
 export WINEARCH=win64
 export LESSHISTFILE=-
-export HISTFILE="$XDG_DATA_HOME"/zsh/history
 export ZDOTDIR="$XDG_CONFIG_HOME"/zsh
+export HISTFILE="$ZDOTDIR"/.zsh_history
 export STARSHIP_CONFIG="$XDG_CONFIG_HOME"/starship.toml
 export STARSHIP_CACHE="$XDG_CACHE_HOME"/starship
 export _JAVA_OPTIONS="-Dawt.useSystemAAFontSettings=on -Djava.util.prefs.userRoot=$XDG_CONFIG_HOME/java -Dswing.defaultlaf=com.sun.java.swing.plaf.gtk.GTKLookAndFeel"

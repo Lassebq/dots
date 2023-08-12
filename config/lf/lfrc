@@ -17,8 +17,9 @@ set mouse
 set previewer ~/.config/lf/previewer
 set cleaner ~/.config/lf/cleaner
 
-map <delete> $trash-put $fx
+map <delete> %rip $fx
 map <enter> :shell
+map <c-z> %rip -u
 map <c-s> :calcdirsize
 map <c-c> :copy
 map <c-v> :paste

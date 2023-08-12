@@ -35,7 +35,7 @@ local branch = {
 	"branch",
 	icon = "",
 	separator = { left = "", right = "" },
-  padding = 0.1
+  padding = 1
 }
 
 local diff = {

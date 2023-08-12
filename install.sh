@@ -51,13 +51,16 @@ checkpackages_extra=(
 "bat"
 "btop"
 "cava"
+"code"
 "dunst"
 "exa"
+"swayosd-git"
 "fd"
 "ffmpegthumbnailer"
 "wf-recorder"
 "wtype"
 "lf"
+"rm-improved"
 "mpd"
 "mpd-mpris-bin"
 "mpc"
@@ -65,7 +68,6 @@ checkpackages_extra=(
 "mpv-mpris"
 "neovim"
 "nitch"
-"google-chrome"
 "imagemagick"
 "rofi-calc"
 "rofi-emoji"
@@ -333,6 +335,14 @@ if y_or_n; then
     cp -r ./config/. ~/.config/
     cp -r ./local/share/. ~/.local/share/
     ./change-theme.sh "$(basename "$(find themes/ -maxdepth 1 -mindepth 1 | head -1)")"
+fi
+
+echo -n "Install VSCode themes?"
+if y_or_n; then
+    for theme in "catppuccin.catppuccin-vsc" "arcticicestudio.nord-visual-studio-code" "sainnhe.everforest" "enkia.tokyo-night"
+    do
+        code --install-extension "$theme"
+    done
 fi
 
 echo "Setup complete."
