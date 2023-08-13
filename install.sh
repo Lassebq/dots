@@ -42,7 +42,7 @@ swaypkgs=(
 
 hyprlandpkgs=(
 "gtklock"
-"waybar-hyprland"
+"waybar-git"
 "swww"
 "xdg-desktop-portal-hyprland"
 )
@@ -101,6 +101,15 @@ is_nvidia() {
 
 pkg_installed() {
     pacman -Qi "$1" > /dev/null 2>&1
+}
+
+error() {
+    if [ -z "$1" ]; then
+        echo -e "\033[31mError: $1\033[0m"
+    else
+        echo -e "\033[31mSomething went wrong!\033[0m"
+    fi
+    exit 1
 }
 
 y_or_n() {
@@ -182,19 +191,19 @@ done
 
 if (( ${#installpkgs[@]} )) || (( ${#makeyay[@]} )); then
     echo -n "Install missing packages?"
-    y_or_n || (echo "Cannot proceed without necessary packages!"; exit)
-    sudo pacman -Syy || ( echo "Could not update database!"; exit)
+    y_or_n || error "Cannot proceed without necessary packages!"
+    sudo pacman -Syy || error "Could not update database!"
     if (( ${#makeyay[@]} )); then
         sudo pacman -S --noconfirm "${makeyay[@]}"
     fi
     if ! pkg_installed "yay"; then
         tempdir=$(mktemp -d)
-        git clone https://aur.archlinux.org/yay.git "$tempdir" || exit
-        cd "$tempdir" || exit
-        makepkg -si --noconfirm || exit
+        git clone https://aur.archlinux.org/yay.git "$tempdir" || error
+        cd "$tempdir" || error
+        makepkg -si --noconfirm || error "Failed to install necessary packages!"
     fi
     echo "Installing: ${installpkgs[*]}"
-    yay -S --noconfirm "${installpkgs[@]}"
+    yay -S --noconfirm "${installpkgs[@]}" || error "Failed to install necessary packages!"
 fi
 
 if ! pkg_installed "$selected_desktop"; then
