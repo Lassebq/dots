@@ -1,0 +1,6 @@
+#!/bin/bash
+hyprpicker -r -z &
+picker_proc=$!
+
+grim -g "$(slurp)" -
+kill $picker_proc

@@ -21,6 +21,7 @@ checkpackages=(
 "pipewire-pulse"
 "pamixer"
 "pavucontrol"
+"brightnessctl"
 "rofi-lbonn-wayland-git"
 "ttf-jetbrains-mono-nerd"
 )
@@ -103,7 +104,16 @@ pkg_installed() {
     pacman -Qi "$1" > /dev/null 2>&1
 }
 
-error() {
+
+warning() {
+    if [ -z "$1" ]; then
+        echo -e "\033[33mWarning: $1\033[0m"
+    else
+        echo -e "\033[33mSomething went wrong!\033[0m"
+    fi
+}
+
+fatal() {
     if [ -z "$1" ]; then
         echo -e "\033[31mError: $1\033[0m"
     else
@@ -191,73 +201,68 @@ done
 
 if (( ${#installpkgs[@]} )) || (( ${#makeyay[@]} )); then
     echo -n "Install missing packages?"
-    y_or_n || error "Cannot proceed without necessary packages!"
-    sudo pacman -Syy || error "Could not update database!"
+    y_or_n || fatal "Cannot proceed without necessary packages!"
+    sudo pacman -Syy || fatal "Could not update database!"
     if (( ${#makeyay[@]} )); then
         sudo pacman -S --noconfirm "${makeyay[@]}"
     fi
     if ! pkg_installed "yay"; then
         tempdir=$(mktemp -d)
-        git clone https://aur.archlinux.org/yay.git "$tempdir" || error
-        cd "$tempdir" || error
-        makepkg -si --noconfirm || error "Failed to install necessary packages!"
+        git clone https://aur.archlinux.org/yay.git "$tempdir" || fatal
+        cd "$tempdir" || fatal
+        makepkg -si --noconfirm || fatal "Failed to install necessary packages!"
     fi
     echo "Installing: ${installpkgs[*]}"
-    yay -S --noconfirm "${installpkgs[@]}" || error "Failed to install necessary packages!"
+    yay -S --noconfirm "${installpkgs[@]}" || fatal "Failed to install necessary packages!"
 fi
 
+installpkgs=("$selected_desktop")
 if ! pkg_installed "$selected_desktop"; then
 if is_nvidia; then
     echo "Looks like you're using NVIDIA graphics card."
     if [ "$selected_desktop" = "hyprland" ]; then
         echo "Use hyprland-nvidia?"
         if y_or_n; then
-            yay -S --noconfirm hyprland-nvidia
-        else
-            yay -S --noconfirm hyprland
+            installpkgs=(hyprland-nvidia)
         fi
     elif [ "$selected_desktop" = "hyprland-git" ]; then
         echo "Use wlroots-nvidia-git?"
         if y_or_n; then
-            yay -S --noconfirm wlroots-nvidia-git hyprland-shared-wlroots-git
+            installpkgs=(wlroots-nvidia-git hyprland-shared-wlroots-git)
         else
-            yay -S --noconfirm hyprland-shared-wlroots-git
+            installpkgs=(hyprland-shared-wlroots-git)
         fi
-    elif [ "$selected_desktop" = "*-git" ]; then
+    elif [[ "$selected_desktop" = "*-git" && "$selected_desktop" != "river-git" ]]; then
         echo "Use wlroots-nvidia-git?"
         if y_or_n; then
-            yay -S --noconfirm wlroots-nvidia-git "$selected_desktop"
-        else
-            yay -S --noconfirm "$selected_desktop"
-        fi 
+            installpkgs=(wlroots-nvidia-git "$selected_desktop")
+        fi
     else
         echo "Use wlroots-nvidia?"
         if y_or_n; then
-            yay -S --noconfirm wlroots-nvidia "$selected_desktop"
-        else
-            yay -S --noconfirm "$selected_desktop"
+            installpkgs=(wlroots-nvidia "$selected_desktop")
         fi
     fi
     echo "Rebuild kernel with NVIDIA Dynamic Kernel Module Support?"
     if y_or_n; then
-        installpkgs=()
+        installpkgs2=()
         for pkg in "${nvidiapkgs[@]}"; do
             if ! pkg_installed "$pkg"; then
-                installpkgs+=("$pkg")
+                installpkgs2+=("$pkg")
             fi
         done
-        yay -S --noconfirm "${installpkgs[@]}"
+        yay -S --noconfirm "${installpkgs2[@]}" || fatal "Failed to install!"
         sudo sed -i 's/MODULES=()/MODULES=(nvidia nvidia_modeset nvidia_uvm nvidia_drm)/' /etc/mkinitcpio.conf
         echo "options nvidia-drm modeset=1" | sudo tee -a /etc/modprobe.d/nvidia.conf
         sudo mkinitcpio -p linux
     fi
 else
     if [ "$selected_desktop" = "hyprland-git" ]; then
-        yay -S --noconfirm hyprland-shared-wlroots-git
-    else
-        yay -S --noconfirm "$selected_desktop"
+        installpkgs=(hyprland-shared-wlroots-git)
     fi
 fi
+
+yay -S --noconfirm "${installpkgs[@]}" || fatal "Could not install desktop package"
 fi
 
 installpkgs=()
@@ -324,7 +329,7 @@ if (( ${#installpkgs[@]} )); then
         fi
         i=$((i+1))
     done
-    yay -S --noconfirm "${installpkgs2[@]}"
+    yay -S --noconfirm "${installpkgs2[@]}" || warning "Could not install optional packages!"
 fi
 
 pwd
@@ -336,13 +341,14 @@ fi
 
 echo -n "Copy new config files?"
 if y_or_n; then
-    sudo chsh -s /bin/zsh "$USER"
+    gsettings set org.gnome.desktop.interface font-name "JetBrainsMono NF 12"
+    sudo chsh -s /bin/zsh "$USER" || warning "Shell could not be changed"
     ln -sf ~/.config/zsh/.zshenv ~/.zshenv
     mkdir -p ~/.local/share/zsh
     mkdir -p ~/.cache/zsh
     mkdir -p ~/.local/share/mpd
     cp -r ./config/. ~/.config/
-    cp -r ./local/share/. ~/.local/share/
+    cp -r ./local/. ~/.local/
     ./change-theme.sh "$(basename "$(find themes/ -maxdepth 1 -mindepth 1 | head -1)")"
 fi
 
