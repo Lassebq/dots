@@ -152,4 +152,6 @@ inputs=($(riverctl list-inputs | grep "^pointer-"))
 for input in "${inputs[@]}"
 do
     riverctl input "$input" tap enabled
+    riverctl input "$input" disable-while-typing disabled
+    riverctl input "$input" natural-scroll enabled
 done
