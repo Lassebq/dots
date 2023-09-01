@@ -10,13 +10,21 @@ CACHE="$HOME/.cache/lf/thumbnail.$(stat --printf '%n\0%i\0%F\0%s\0%W\0%Y' \
 
 mime=$(file -Lb --mime-type "$file")
 
-
 decompile() {
     java -jar /usr/share/java/cfr/cfr.jar --comments false "$1"
 }
 
 image() {
-    kitty +kitten icat --silent --stdin no --transfer-mode file --place "${2}x${3}@${4}x${5}" "$1" < /dev/null > /dev/tty
+    if [ "$TERM" = "xterm-kitty" ]; then
+        kitty +kitten icat --silent --stdin no --transfer-mode file --place "${2}x${3}@${4}x${5}" "$1" < /dev/null > /dev/tty
+    elif [[ "$TERM" = "foot" || -n "$KONSOLE_VERSION" ]]; then
+        chafa -f sixel -s "$2x$3" "$1"
+    elif [ "$TERM_PROGRAM" = "WezTerm" ]; then
+        # Doesn't work
+        wezterm imgcat --width "$2" --height "$3" "$1"
+    else
+        chafa -f symbols -s "$2x$3" "$1"
+    fi
 }
 
 case "$file" in 
@@ -26,12 +34,12 @@ case "$file" in
     exit 1;
 esac
 
-if [[ "$mime" =~ ^image ]]; then
+if [[ "$mime" =~ ^image/ ]]; then
     image "$file" "$w" "$h" "$x" "$y"
     exit 1
 fi
 
-if [[ "$mime" =~ ^text || "$mime" = application/json || "$mime" = application/x-ndjson ]]; then
+if [[ "$mime" =~ ^text/ || "$mime" = application/json || "$mime" = application/x-ndjson || "$mime" = application/javascript ]]; then
     bat --color=always --paging=never --decorations=never "$file"
     exit 0
 fi

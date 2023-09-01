@@ -3,14 +3,14 @@
 riverctl map -layout 0 normal Super Q spawn "$TERMINAL"
 riverctl map -layout 0 normal Super W close
 riverctl map -layout 0 normal Super M spawn ~/.config/wlogout/exec
-riverctl map -layout 0 normal Super E spawn "gtk-launch nemo"
+riverctl map -layout 0 normal Super E spawn 'gtk-launch "$(xdg-mime query default inode/directory)"'
 riverctl map -layout 0 normal Super A spawn "rofi -show drun"
 riverctl map -layout 0 normal Super R spawn "rofi -show run"
 riverctl map -layout 0 normal Super+Shift T spawn ~/dots/rofi-dmenu
-riverctl map -layout 0 normal Super G spawn firefox-nightly
+riverctl map -layout 0 normal Super G spawn 'gtk-launch "$(xdg-settings get default-web-browser)"'
 riverctl map -layout 0 normal Super+Shift R spawn ~/.config/river/river
 riverctl map normal None Print spawn 'sh -c "grim - | wl-copy"'
-riverctl map normal Shift Print spawn 'sh -c "wayland-shot | wl-copy"'
+riverctl map normal Shift Print spawn 'sh -c '"'"'grim -g "$(slurp)" - | wl-copy'"'"''
 
 riverctl focus-follows-cursor always
 
@@ -122,9 +122,9 @@ do
     riverctl map $mode None XF86Eject spawn 'eject -T'
 
     # Control pulse audio volume with pamixer (https://github.com/cdemoulins/pamixer)
-    riverctl map $mode None XF86AudioRaiseVolume  spawn 'pamixer -i 5'
-    riverctl map $mode None XF86AudioLowerVolume  spawn 'pamixer -d 5'
-    riverctl map $mode None XF86AudioMute         spawn 'pamixer --toggle-mute'
+    riverctl map $mode None XF86AudioRaiseVolume  spawn 'swayosd-client --output-volume=+5'
+    riverctl map $mode None XF86AudioLowerVolume  spawn 'swayosd-client --output-volume=-5'
+    riverctl map $mode None XF86AudioMute         spawn 'swayosd-client --output-volume=mute-toggle'
 
     # Control MPRIS aware media players with playerctl (https://github.com/altdesktop/playerctl)
     riverctl map $mode None XF86AudioMedia spawn 'playerctl play-pause'
@@ -133,22 +133,22 @@ do
     riverctl map $mode None XF86AudioNext  spawn 'playerctl next'
 
     # Control screen backlight brightness with brightnessctl
-    riverctl map $mode None XF86MonBrightnessUp   spawn 'brightnessctl s +5%'
-    riverctl map $mode None XF86MonBrightnessDown spawn 'brightnessctl s 5%-'
+    riverctl map $mode None XF86MonBrightnessUp   spawn 'swayosd-client --brightness=+5'
+    riverctl map $mode None XF86MonBrightnessDown spawn 'swayosd-client --brightness=-5'
 done
 
 # Set background and border color
 ~/.config/river/colors
 
 # Make all views with app-id "bar" and any title use client-side decorations
-riverctl rule-add csd -app-id "bar"
+#riverctl rule-add csd -app-id "bar"
 
 # Set keyboard repeat rate
 riverctl set-repeat 30 200
 
 riverctl keyboard-layout -options "grp:shift_caps_toggle" us,ru
 
-inputs=($(riverctl list-inputs | grep "^pointer-"))
+inputs=($(riverctl list-inputs | grep "^pointer-" | grep -i "touchpad"))
 for input in "${inputs[@]}"
 do
     riverctl input "$input" tap enabled

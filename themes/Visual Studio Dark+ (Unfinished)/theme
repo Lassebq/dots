@@ -1,6 +1,0 @@
-#!/bin/bash
-
-NVIM_THEME=vscode
-VSCODE_THEME="Default Dark+"
-GTK_THEME=Colloid-Dark-Compact
-COLOR_SCHEME=default

@@ -3,6 +3,7 @@
 exec dbus-update-activation-environment --systemd DISPLAY WAYLAND_DISPLAY SWAYSOCK XDG_CURRENT_DESKTOP
 exec autotiling
 exec waybar -c ~/.config/waybar/sway.jsonc
-exec swaybg -m fill -o "*" -i ~/.cache/swaybg/img
+exec wallpaper
 exec pkill -x swayidle
 exec swayidle -C ~/.config/swayidle/sway
+exec swayosd-server

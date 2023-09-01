@@ -13,13 +13,18 @@ lfcd () {
     fi
 }
 
+alias killall="pkill -x"
 alias icat="kitty icat"
-alias fetch="nitch"
+alias imgcat="wezterm imgcat"
 alias ncmp="ncmpcpp"
 alias lfsu="sudo -E -H lf"
-alias pacman="yay"
-alias rmpkg="pacman -Qqd | pacman -Rsu -"
+alias rmpkg="yay -Qqd | yay -Rsu -; sudo rm -rf /var/cache/pacman/pkg/"
 alias lf="lfcd"
-alias ls="exa"
+alias grep="grep --color"
+alias less="$PAGER"
+alias dmesg="sudo -v; sudo dmesg --color=always | less"
+alias la="ls -A"
+alias ll="ls -alG"
+alias ls="ls --color -F"
 alias file="file -Lb --mime-type"
 alias aliases="$EDITOR "'"'"$ZDOTDIR/zsh-aliases.zsh"'"'""

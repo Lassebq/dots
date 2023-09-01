@@ -11,3 +11,5 @@
 @define-color monitor_resources #88C0D0;
 @define-color idle_inhibit #D08770;
 @define-color urgent #A3BE8C;
+@define-color critical #BF616A;
+@define-color healthy #A3BE8C;

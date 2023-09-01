@@ -13,7 +13,7 @@
         "custom/media_previous",
         "custom/media_play",
         "custom/media_next",
-        "mpris"
+        "custom/mpris"
     ],
     "modules-center": [
         "custom/separator_l",

@@ -15,8 +15,20 @@ getstatus() {
     fi
 }
 
-dbus-monitor path='/org/mpris/MediaPlayer2',interface='org.freedesktop.DBus.Properties',member='PropertiesChanged' --profile |
-  while read -r _; do
-    printf '{"text": "%s"}\n' "$(getstatus)"
-  done
+gettitle() {
+    playerctl metadata title
+}
+
+if [ "$1" == title ]; then
+    dbus-monitor path='/org/mpris/MediaPlayer2',interface='org.freedesktop.DBus.Properties',member='PropertiesChanged' --profile |
+    while read -r _; do
+        printf '{"text": "%s"}\n' "$(gettitle)"
+    done
+elif [ "$1" == status ]; then
+    dbus-monitor path='/org/mpris/MediaPlayer2',interface='org.freedesktop.DBus.Properties',member='PropertiesChanged' --profile |
+    while read -r _; do
+        printf '{"text": "%s"}\n' "$(getstatus)"
+    done
+fi
+
 exit 0;

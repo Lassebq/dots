@@ -153,6 +153,7 @@ tooltip {
 }
 
 #mpris,
+#custom-mpris,
 #custom-media_play,
 #custom-media_next,
 #custom-media_previous,
@@ -161,7 +162,7 @@ tooltip {
     border-top: solid @media_player 3px;
 }
 
-#custom-media_volume,
+#custom-mpris,
 #mpris {
     padding: 0px 5px;
     color: @media_player;
@@ -192,10 +193,6 @@ tooltip {
     min-width: 600px;
 }
 
-#temperature.critical {
-    color: @idle_inhibit;
-}
-
 #workspaces {
     padding-right: 0px;
     padding-left: 5px;
@@ -211,6 +208,32 @@ tooltip {
     min-width: 52px;
 }
 
-#battery {
+#battery,
+#battery.good,
+#battery.warning {
     color: @text;
+}
+
+#battery.critical {
+    color: @critical;
+}
+
+#battery.charging {
+    color: @text;
+    animation-name: battery;
+    animation-duration: 2s;
+    animation-iteration-count: infinite;
+    animation-timing-function: linear;
+}
+
+@keyframes battery {
+    0% {
+        color: @healthy;
+    }
+    50% {    
+        color: @text;
+    }
+    100% {    
+        color: @healthy;
+    }
 }

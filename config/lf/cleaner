@@ -1,3 +1,8 @@
 #!/usr/bin/env bash
 
-kitty +kitten icat --clear --stdin no --silent --transfer-mode file < /dev/null > /dev/tty
+if [ "$TERM" = "xterm-kitty" ]; then
+    kitty +kitten icat --clear --stdin no --silent --transfer-mode file < /dev/null > /dev/tty
+elif [ -n "$KONSOLE_VERSION" ]; then
+    # Konsole does not clear sixel image from preview, needs redraw
+    lf -remote "send $id :redraw"
+fi

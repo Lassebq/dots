@@ -1,8 +1,0 @@
-#!/bin/sh
-
-rofipid=$(cat /run/user/1000/rofi.pid)
-if ps -p $rofipid > /dev/null; then
-    kill $rofipid
-else       
-    rofi -show &
-fi

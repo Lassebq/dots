@@ -1,0 +1,12 @@
+{
+  "window.titleBarStyle": "custom",
+  "window.title": " ",
+  "window.dialogStyle": "custom",
+  "workbench.settings.editor": "json",
+  "editor.fontFamily": "system-ui",
+  "editor.smoothScrolling": true,
+  "extensions.autoUpdate": false,
+  "path-intellisense.absolutePathToWorkspace": false,
+  "path-intellisense.showHiddenFiles": true,
+  "zenMode.centerLayout": false
+}

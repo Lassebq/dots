@@ -94,7 +94,7 @@
 
     "custom/launch": {
         "format": "",
-        "on-click": "~/.config/rofi/rofitoggle",
+        "on-click": "rofi -show drun",
         "tooltip": false
     },
 
@@ -159,10 +159,9 @@
         "format": "{}",
         "tooltip": false,
         "on-click": "playerctl play-pause",
-        "on-click-right": "$TERMINAL --title ncmpcpp sh -c 'ncmpcpp'",
         "return-type": "json",
         "exec-on-event": false,
-        "exec": "~/.config/waybar/scripts/play-pause"
+        "exec": "~/.config/waybar/scripts/play-pause status"
     },
 
     "custom/media_next": {
@@ -177,10 +176,14 @@
         "on-click": "playerctl previous"
     },
 
-    "mpris": {
-        "format": "{title}",
+    "custom/mpris": {
+        "format": "{}",
         "max-length": 32,
-        "on-click": "playerctl play-pause"
+        "on-click": "playerctl play-pause",
+        //"on-click-right": "playerctl play-pause",
+        "return-type": "json",
+        "exec-on-event": false,
+        "exec": "~/.config/waybar/scripts/play-pause title"
     },
 
     "tray": {
@@ -222,7 +225,7 @@
             "critical": 20
         },
         "format": "{icon} {capacity}%",
-        "format-charging": " {capacity}%",
+        "format-charging": "󰂄 {capacity}%",
         "format-plugged": " {capacity}%",
         "format-alt": "{time} {icon}",
         "format-icons": ["󰂎", "󰁺", "󰁻", "󰁼", "󰁽", "󰁾", "󰁿", "󰂀", "󰂁", "󰂂", "󰁹"]

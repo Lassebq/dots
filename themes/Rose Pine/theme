@@ -1,0 +1,6 @@
+#!/bin/bash
+
+NVIM_THEME=rose-pine
+VSCODE_THEME="Rosé Pine"
+GTK_THEME="rose-pine-gtk"
+COLOR_SCHEME=default

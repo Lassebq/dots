@@ -7,12 +7,16 @@ decompile() {
 
 mime=$(file -Lb --mime-type "$file")
 if [[ "$mime" =~ ^image ]]; then
-    kitty +kitten icat --silent --stdin no --transfer-mode file "$file" < /dev/null > /dev/tty
+    if [ "$TERM" = "xterm-kitty" ]; then
+        kitty +kitten icat --silent --stdin no --transfer-mode file "$file" < /dev/null > /dev/tty
+    elif [[ "$TERM" = "foot" || -n "$KONSOLE_VERSION" ]]; then
+        chafa -f sixel "$1"
+    fi
     read -rsn1
     exit 0
 fi
 
-if [[ "$mime" =~ ^text || "$mime" = application/json || "$mime" = application/x-ndjson || "$mime" = inode/x-empty ]]; then
+if [[ "$mime" =~ ^text || "$mime" = application/json || "$mime" = application/x-ndjson || "$mime" = inode/x-empty || "$mime" = application/javascript ]]; then
     $EDITOR "$file"
     exit 0
 fi
@@ -28,4 +32,3 @@ if [[ "$mime" = application/x-java-applet ]]; then
 fi
 
 xdg-open "$file"
-exit 0
