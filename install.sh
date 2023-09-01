@@ -422,7 +422,7 @@ if [[ "$yn" = [Yy]* || "$yn" = [Ll]* ]]; then
     mkdir -p ~/.local/share/mpd
     # You can remove .zprofile from your $HOME as long you're using a Display Manager which sources .profile (For example, greetd)
     # (NVM, it breaks agetty. Maybe there's a workaround, idk)
-    ln -sf ~/.config/zsh/.zprofile ~/.zprofile
+    ln -sf ~/.config/zsh/.zshenv ~/.zshenv
     cp -rf ./local/. ~/.local/
     # make .mozilla/firefox/$USER the default profile
     if [[ "$browser" = firefox* ]]; then
@@ -480,6 +480,7 @@ if [[ "$yn" = [Yy]* || "$yn" = [Ll]* ]]; then
     ./change-theme.sh "$(basename "$(find themes/ -maxdepth 1 -mindepth 1 | head -1)")"
 fi
 
+# source .zshenv and check if $VSCODE_PORTABLE is set
 if [ -f "$XDG_CONFIG_HOME/Code/User/settings.json" ]; then
     for vscode in "Code - OSS" "VSCodium"
     do
