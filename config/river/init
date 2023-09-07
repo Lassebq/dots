@@ -12,7 +12,9 @@
 
 ~/.config/river/autostart
 
-~/.config/river/river
+~/.config/river/binds
+~/.config/river/config
+~/.config/river/colors
 
 # Set the default layout generator to be rivertile and start it.
 # River will send the process group of the init executable SIGTERM on exit.

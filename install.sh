@@ -6,19 +6,36 @@ preppkgs=(
 "git"
 )
 
-checkpkgs=(
-"jq"
-"libadwaita-without-adwaita-git" # https://stopthemingmy.app/ fuck you gnome devs
-"starship"
-"bat"
-"zsh"
-"grim"
-"slurp"
-"swayosd-git"
-"wlogout"
-"wl-clipboard"
+#TODO yay fucks up those packages so we will install them as soon as possible
+importantpkgs=(
+"noto-fonts"
+"wireplumber"
+"pipewire-jack"
 "pipewire-alsa"
 "pipewire-pulse"
+"rofi-lbonn-wayland-git"
+"xdg-desktop-portal-wlr"
+"xdg-desktop-portal-hyprland"
+"wlroots-nvidia"
+"wlroots-nvidia-git"
+)
+
+checkpkgs=(
+"jq"
+"less"
+"libadwaita-without-adwaita-git" # https://stopthemingmy.app/ fuck you gnome devs
+"starship"
+"grim"
+"slurp"
+"swayidle"
+"swayosd-git"
+"wireplumber"
+"wlogout"
+"wl-clipboard"
+"noto-fonts"
+"pipewire-alsa"
+"pipewire-pulse"
+"pipewire-jack"
 "pamixer"
 "pavucontrol"
 "brightnessctl"
@@ -26,17 +43,16 @@ checkpkgs=(
 "rofi-calc"
 "rofi-emoji"
 "ttf-jetbrains-mono-nerd"
+"xdg-utils"
 )
 
 riverpkgs=(
-"swayidle"
 "waybar-git"
 "wlopm"
 "xdg-desktop-portal-wlr"
 )
 
 swaypkgs=(
-"swayidle"
 "gtklock"
 "waybar-git"
 "autotiling"
@@ -44,25 +60,34 @@ swaypkgs=(
 )
 
 hyprlandpkgs=(
-"swayidle"
 "gtklock"
 "waybar-git"
 "xdg-desktop-portal-hyprland"
 )
 
 checkpackages_extra=(
+"bat"
 "btop"
+"bottom"
 "cava"
 "dunst"
 "fd"
+"lf"
 "hyprpicker"
 "wf-recorder"
 "wtype"
 "mpd"
 "mpv"
+"ncmpcpp"
 "neovim"
 "xdg-desktop-portal-termfilechooser-git"
 "polkit-gnome"
+"wine"
+)
+
+shellpkg=(
+"bash"
+"zsh"
 )
 
 codepkg=(
@@ -141,20 +166,44 @@ pkg_installed() {
     pacman -Q "$1" > /dev/null 2>&1
 }
 
+enable_multilib() {
+    if ! grep -x "\[multilib\]\s*" /etc/pacman.conf > /dev/null; then
+        ( echo "[multilib]"; echo "Include = /etc/pacman.d/mirrorlist" ) | sudo tee -a /etc/pacman.conf > /dev/null
+    fi
+}
+
+bold='\033[1m'
+default='\033[0m'
+red='\033[31m'
+yellow='\033[33m'
+green='\033[32m'
+cyan='\033[36m'
+blue='\033[34m'
+magenta='\033[35m'
+black='\033[30m'
+white='\033[37m'
+light_red='\033[91m'
+light_yellow='\033[93m'
+light_green='\033[92m'
+light_cyan='\033[96m'
+light_blue='\033[94m'
+light_magenta='\033[95m'
+light_black='\033[90m'
+light_white='\033[97m'
 
 warning() {
-    if [ -z "$1" ]; then
-        echo -e "\033[33mWarning: $1\033[0m"
+    if [ -n "$1" ]; then
+        echo -e "${light_yellow}Warning: $1${default}"
     else
-        echo -e "\033[33mSomething went wrong!\033[0m"
+        echo -e "${light_yellow}Something went wrong!${default}"
     fi
 }
 
 fatal() {
     if [ -n "$1" ]; then
-        echo -e "\033[31mError: $1\033[0m"
+        echo -e "${light_red}Error: $1${default}"
     else
-        echo -e "\033[31mSomething went wrong!\033[0m"
+        echo -e "${light_red}Something went wrong!${default}"
     fi
     exit 1
 }
@@ -176,7 +225,7 @@ find_missing_pkgs() {
     done
 }
 
-fancy_fmt="%d. [\033[94m%s\033[0m]\\n"
+fancy_fmt="%d. [$light_blue%s$default]\\n"
 
 select_msg() {
     while true; do
@@ -211,12 +260,14 @@ if [ "$(id -u)" = 0 ]; then
     exit 1
 fi
 
-echo -e '\033[94m     ____        __      
+echo -en "$bold$blue"
+echo -e '
+     ____        __
     / __ \____  / /______
    / / / / __ \/ __/ ___/
-  / /_/ / /_/ / /_(__  ) 
- /_____/\____/\__/____/  
-\033[0m'
+  / /_/ / /_/ / /_(__  )
+ /_____/\____/\__/____/'
+echo -en "$default"
 
 echo "This script will install a wayland compositor of your choice with my dot files"
 echo
@@ -234,24 +285,6 @@ else
     cd "$parent_path" || fatal
 fi
 
-installpkgs=()
-
-if is_nvidia && ! pkg_installed nvidia; then
-    echo "Looks like you're using NVIDIA graphics card."
-    echo -n "Rebuild initramfs with nvidia-dkms?"
-    if y_or_n; then
-        find_missing_pkgs "${nvidiapkgs[*]}"
-        sudo pacman -S --noconfirm "${installpkgs[@]}" || fatal "Failed to install!"
-        sudo sed -i 's/MODULES=()/MODULES=(nvidia nvidia_modeset nvidia_uvm nvidia_drm)/' /etc/mkinitcpio.conf
-        echo "options nvidia-drm modeset=1" | sudo tee -a /etc/modprobe.d/nvidia.conf
-        sudo mkinitcpio -p linux
-    fi
-fi
-
-selected_desktop="$(select_msg "Select preferred desktop" "${desktops[*]}")"
-echo "Selected desktop: $selected_desktop"
-
-installpkgs=()
 makeyay=()
 
 for pkg in "${preppkgs[@]}"; do
@@ -261,8 +294,7 @@ for pkg in "${preppkgs[@]}"; do
 done
 
 if ! pkg_installed "yay"; then
-    echo -n "Install yay?"
-    y_or_n || fatal "Cannot proceed without necessary packages!"
+    echo "Installing yay"
     sudo pacman -Sy || fatal "Could not update database!"
     if (( ${#makeyay[@]} )); then
         sudo pacman -S --noconfirm "${makeyay[@]}" || fatal "Failed to install necessary packages!"
@@ -273,6 +305,26 @@ if ! pkg_installed "yay"; then
     makepkg -si --noconfirm || fatal "Failed to install necessary packages!"
 fi
 
+installpkgs=()
+
+if is_nvidia && ! pkg_installed nvidia; then
+    echo -e "Looks like you're using ${light_green}NVIDIA${default} graphics card."
+    echo -n "Rebuild initramfs with nvidia-dkms?"
+    if y_or_n; then
+        find_missing_pkgs "${nvidiapkgs[*]}"
+        yay -S --noconfirm "${installpkgs[@]}" || fatal "Failed to install!"
+        sudo sed -i 's/MODULES=()/MODULES=(nvidia nvidia_modeset nvidia_uvm nvidia_drm)/' /etc/mkinitcpio.conf
+        echo "options nvidia-drm modeset=1" | sudo tee -a /etc/modprobe.d/nvidia.conf
+        sudo mkinitcpio -p linux
+	sudo systemctl enable nvidia-hibernate.service nvidia-persistenced.service nvidia-powerd.service nvidia-resume.service nvidia-suspend.service
+    fi
+fi
+
+installpkgs=()
+
+selected_desktop="$(select_msg "Select preferred desktop" "${desktops[*]}")"
+echo "Selected desktop: $selected_desktop"
+
 if ! exact_pkg_installed "$selected_desktop"; then
     desktop_pkgs=("$selected_desktop")
     if is_nvidia; then
@@ -280,7 +332,7 @@ if ! exact_pkg_installed "$selected_desktop"; then
             desktop_pkgs=(hyprland-nvidia)
         elif [ "$selected_desktop" = "hyprland-git" ]; then
             # If we already have wlroots installed and it's not -git, install regular hyprland-git
-            if [ "$(yay -Qq wlroots 2>/dev/null)" = "wlroots" ]; then
+            if exact_pkg_installed "wlroots"; then
                 desktop_pkgs=(hyprland-nvidia-git)
             else
                 desktop_pkgs=(wlroots-nvidia-git hyprland-shared-wlroots-git)
@@ -293,7 +345,7 @@ if ! exact_pkg_installed "$selected_desktop"; then
     else
         if [ "$selected_desktop" = "hyprland-git" ]; then
             # If we already have wlroots installed and it's not -git, install regular hyprland-git
-            if [ "$(yay -Qq wlroots 2>/dev/null)" = "wlroots" ]; then
+            if exact_pkg_installed "wlroots"; then
                 desktop_pkgs=(hyprland-git)
             else
                 desktop_pkgs=(hyprland-shared-wlroots-git)
@@ -337,6 +389,11 @@ case "$bgutil" in
         wallpapercmd='wbg ~/.cache/swaybg/img &';;
 esac
 
+shell="$(select_msg "Select shell" "${shellpkg[*]}")"
+if ! exact_pkg_installed "$shell"; then
+    installpkgs+=("$shell")
+fi
+
 terminal="$(select_msg "Select terminal emulator" "${terminalpkg[*]}")"
 if ! exact_pkg_installed "$terminal"; then
     installpkgs+=("$terminal")
@@ -379,6 +436,8 @@ if (( ${#installpkgs[@]} )); then
     done
 fi
 
+# Resolve optional dependencies
+
 if array_contains "${installpkgs[*]}" "mpd"; then
     installpkgs+=("mpd-mpris" "mpc")
 fi
@@ -391,21 +450,50 @@ if array_contains "${installpkgs[*]}" "lf"; then
     installpkgs+=("imagemagick" "ffmpegthumbnailer" "bat")
 fi
 
+if array_contains "${installpkgs[*]}" "wine"; then
+    if is_nvidia; then
+        installpkgs+=("lib32-nvidia-utils")
+    else
+        installpkgs+=("lib32-mesa")
+    fi
+    installpkgs+=("lib32-pipewire")
+    enable_multilib
+fi
+
 printf "\n"
 echo "Following packages will be installed:"
-printf "\033[94m"
+printf "$light_blue"
 i=1
 for pkg in "${installpkgs[@]}"
 do
     printf "%s\n" "$pkg"
     i=$((i+1))
 done | sort | column -c$(tput cols)
-printf "\033[0m\n"
+printf "$default\n"
 
 read -n 1 -s -r -p "Press any key to continue"
 printf "\n"
 
-yay -Sy --noconfirm "${installpkgs[@]}" || warning "Failed to install some packages!"
+
+installpkgs1=()
+for pkg in "${importantpkgs[@]}"; do
+    if array_contains "${installpkgs[@]}" "$pkg"; then
+        installpkgs1+=("$pkg")
+    fi
+done
+yay -Sy --noconfirm "${installpkgs1[@]}" || fatal "Failed to install packages!"
+
+yay -S --noconfirm "${installpkgs[@]}" || fatal "Failed to install packages!"
+
+modify_env() {
+    #TODO slashes in a variable?
+    sed "s|\(export $1=\).*|\1\"$2\"|g" ~/.profile
+}
+
+write_script() {
+    echo '#!/bin/sh'
+    echo "$1"
+}
 
 echo -n "Backup config?"
 if y_or_n; then
@@ -413,28 +501,40 @@ if y_or_n; then
 fi
 
 echo -e "Copy new config files? [\e[91mY\e[0mes | \e[91mN\e[0mo | Sym\e[91mL\e[0mink]:"
-read -r yn
-if [[ "$yn" = [Yy]* || "$yn" = [Ll]* ]]; then
+read -r copyconf
+[ "$copyconf" = Y ] && copyconf=y
+[ "$copyconf" = N ] && copyconf=n
+
+if [ "$copyconf" = y ] || [ "$copyconf" = l ]; then
     gsettings set org.gnome.desktop.interface font-name "JetBrainsMono NF 12"
-    sudo chsh -s /bin/zsh "$USER" || warning "Shell could not be changed"    
-    mkdir -p ~/.local/share/zsh
+    sudo chsh -s /bin/"$shell" "$USER" || warning "Shell could not be changed"    
     mkdir -p ~/.cache/zsh
     mkdir -p ~/.local/share/mpd
-    # You can remove .zprofile from your $HOME as long you're using a Display Manager which sources .profile (For example, greetd)
+    # You can remove .zshenv from your $HOME as long you're using a Display Manager which sources .profile (For example, greetd)
     # (NVM, it breaks agetty. Maybe there's a workaround, idk)
-    ln -sf ~/.config/zsh/.zshenv ~/.zshenv
+    if [ "$shell" = zsh ]; then 
+        ln -sfT ~/.config/zsh/.zshenv ~/.zshenv
+    elif [ "$shell" = bash ]; then
+        ln -sfT ~/.config/bash/.bashrc ~/.bashrc
+        ln -sfT ~/.config/bash/.bash_profile ~/.bash_profile
+    fi
     cp -rf ./local/. ~/.local/
     # make .mozilla/firefox/$USER the default profile
     if [[ "$browser" = firefox* ]]; then
         mkdir -p ~/.mozilla/firefox/"$USER"
         echo "[Profile0]
-        Name=$USER
-        IsRelative=1
-        Path=$USER
-        Default=1
-        " > ~/.mozilla/firefox/profiles.ini
+Name=$USER
+IsRelative=1
+Path=$USER
+Default=1
+" > ~/.mozilla/firefox/profiles.ini
+	echo "[4F96D1932A9F858E]
+Default=$USER
+Locked=1
+" > ~/.mozilla/firefox/installs.ini
         git clone https://github.com/black7375/Firefox-UI-Fix.git ~/.mozilla/firefox/"$USER"/chrome
         cp ~/.mozilla/firefox/"$USER"/chrome/user.js ~/.mozilla/firefox/"$USER"/user.js
+        #TODO may need to tweak some options in user.js
     fi
     # Set default browser
     case "$browser" in
@@ -443,50 +543,55 @@ if [[ "$yn" = [Yy]* || "$yn" = [Ll]* ]]; then
         "firefox-nightly-bin")
             xdg-settings set default-web-browser "firefox-nightly.desktop";;
     esac
-    # 
-fi
-case $yn in
-    [Yy]* )
+
+    if [ "$copyconf" = y ]; then
         cp -r ./config/. ~/.config/
-        ;;
-    [Ll]* )
+    elif [ "$copyconf" = l ]; then
         ln -sf "$(realpath ./config)"/* ~/.config/
-        ;;
-esac
-
-modify_env() {
-    sed "s/\(export $1=\).*/\1\"$2\"/g" ~/.profile
-}
-
-write_script() {
-    echo '#!/bin/sh'
-    echo "$1"
-}
-
-if [[ "$yn" = [Yy]* || "$yn" = [Ll]* ]]; then
+    fi
+    
     if [[ "$browser" = firefox* ]]; then
         mv ~/.config/firefox/* ~/.mozilla/firefox/"$USER"/chrome/
     else
         rm -rf ~/.config/firefox
     fi
-    mv ~/.config/.profile ~/.profile
+    mv ~/.config/profile ~/.profile
+    
     modify_env "TERMINAL" "$terminal"
 
     if ! pkg_installed "bat"; then
         modify_env "PAGER" "less --use-color"
     fi
+    
+    if [ -f ~/.profile ]; then
+        source ~/.profile
+    fi
+
+    if [ -n "$ZDOTDIR" ]; then
+        mkdir -p "$ZDOTDIR"
+        curl "https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/lib/key-bindings.zsh" -o "$ZDOTDIR/zsh-key-bindings.zsh"
+        curl "https://raw.githubusercontent.com/zsh-users/zsh-autosuggestions/master/zsh-autosuggestions.zsh" -o "$ZDOTDIR/zsh-autosuggestions.zsh"
+        curl "https://raw.githubusercontent.com/jirutka/zsh-shift-select/master/zsh-shift-select.plugin.zsh" -o "$ZDOTDIR/zsh-shift-select.zsh"
+    fi
+
     write_script "$wallpapercmd" > ~/.local/bin/wallpaper
     chmod +x ~/.local/bin/wallpaper
     ./change-theme.sh "$(basename "$(find themes/ -maxdepth 1 -mindepth 1 | head -1)")"
 fi
 
-# source .zshenv and check if $VSCODE_PORTABLE is set
-if [ -f "$XDG_CONFIG_HOME/Code/User/settings.json" ]; then
-    for vscode in "Code - OSS" "VSCodium"
-    do
-        mkdir -p "$XDG_CONFIG_HOME/$vscode/User"
-        cp -f "$XDG_CONFIG_HOME/Code/User/settings.json" "$XDG_CONFIG_HOME/$vscode/User/settings.json"
-    done
+if [ -z "$VSCODE_PORTABLE" ]; then
+    if [ -f "$XDG_CONFIG_HOME/Code/User/settings.json" ]; then
+        for vscode in "Code - OSS" "VSCodium"
+        do
+            mkdir -p "$XDG_CONFIG_HOME/$vscode/User"
+            cp -f "$XDG_CONFIG_HOME/Code/User/settings.json" "$XDG_CONFIG_HOME/$vscode/User/settings.json"
+        done
+    fi
+else
+    if [ -f "$XDG_CONFIG_HOME/Code/User/settings.json" ]; then
+        mkdir -p "$VSCODE_PORTABLE"
+        mv -T "$XDG_CONFIG_HOME/Code" "$VSCODE_PORTABLE/user-data"
+    fi
 fi
 
 if pkg_installed "code"; then
@@ -497,8 +602,7 @@ if pkg_installed "code"; then
             code --install-extension "$theme"
         done
     fi
-fi
-if pkg_installed "codium"; then
+elif pkg_installed "codium"; then
     echo -n "Install VSCodium themes?"
     if y_or_n; then
         for theme in "${vscode_themes[@]}"

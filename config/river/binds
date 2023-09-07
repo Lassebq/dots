@@ -1,0 +1,136 @@
+#!/bin/bash
+
+map() {
+    riverctl map -layout 0 normal "$@"
+}
+
+map Super Q spawn "$TERMINAL"
+map Super W close
+map Super M spawn ~/.config/wlogout/exec
+map Super E spawn 'gtk-launch "$(xdg-mime query default inode/directory)"'
+map Super A spawn "rofi -show drun"
+map Super R spawn "rofi -show run"
+map Super+Shift T spawn ~/dots/rofi-dmenu
+map Super G spawn 'gtk-launch "$(xdg-settings get default-web-browser)"'
+map Super+Shift R spawn ~/.config/river/reload
+map None Print spawn 'sh -c "grim - | wl-copy"'
+map Shift Print spawn 'sh -c '"'"'grim -g "$(slurp)" - | wl-copy'"'"''
+
+map Super Right focus-view next
+map Super Left focus-view previous
+
+map Super Down focus-view next
+map Super Up focus-view previous
+
+# Super+Shift+J and Super+Shift+K to swap the focused view with the next/previous
+# view in the layout stack
+map Super+Shift Right swap next
+map Super+Shift Left swap previous
+
+map Super+Shift Down swap next
+map Super+Shift Up swap previous
+
+# Super+Period and Super+Comma to focus the next/previous output
+map Super Period focus-output next
+map Super Comma focus-output previous
+
+# Super+Shift+{Period,Comma} to send the focused view to the next/previous output
+map Super+Shift Period send-to-output next
+map Super+Shift Comma send-to-output previous
+
+# Super+Return to bump the focused view to the top of the layout stack
+#map Super Return zoom
+
+map Super+Control Left send-layout-cmd rivertile "main-ratio -0.05"
+map Super+Control Right send-layout-cmd rivertile "main-ratio +0.05"
+
+map Super K send-layout-cmd rivertile "main-count +1"
+map Super J send-layout-cmd rivertile "main-count -1"
+
+# Super+Alt+{H,J,K,L} to move views
+map Super+Alt H move left 100
+map Super+Alt J move down 100
+map Super+Alt K move up 100
+map Super+Alt L move right 100
+
+# Super+Alt+Control+{H,J,K,L} to snap views to screen edges
+map Super+Alt+Control H snap left
+map Super+Alt+Control J snap down
+map Super+Alt+Control K snap up
+map Super+Alt+Control L snap right
+
+# Super+Alt+Shift+{H,J,K,L} to resize views
+map Super+Alt+Shift H resize horizontal -100
+map Super+Alt+Shift J resize vertical 100
+map Super+Alt+Shift K resize vertical -100
+map Super+Alt+Shift L resize horizontal 100
+
+riverctl map-pointer normal Super BTN_LEFT move-view
+riverctl map-pointer normal Super BTN_RIGHT resize-view
+riverctl map-pointer normal Super BTN_MIDDLE toggle-float
+
+for i in $(seq 1 9)
+do
+    tags=$((1 << (i - 1)))
+
+    # Super+[1-9] to focus tag [0-8]
+    map Super $i set-focused-tags $tags
+
+    # Super+Shift+[1-9] to tag focused view with tag [0-8]
+    map Super+Shift $i set-view-tags $tags
+
+    # Super+Control+[1-9] to toggle focus of tag [0-8]
+    map Super+Control $i toggle-focused-tags $tags
+
+    # Super+Shift+Control+[1-9] to toggle tag [0-8] of focused view
+    map Super+Shift+Control $i toggle-view-tags $tags
+done
+
+# Super+0 to focus all tags
+# Super+Shift+0 to tag focused view with all tags
+all_tags=$(((1 << 32) - 1))
+map Super 0 set-focused-tags $all_tags
+map Super+Shift 0 set-view-tags $all_tags
+
+map Super D toggle-float
+map Super F toggle-fullscreen
+
+# Super+Shift+{Up,Right,Down,Left} to change layout orientation
+map Super+Control+Shift Up    send-layout-cmd rivertile "main-location top"
+map Super+Control+Shift Right send-layout-cmd rivertile "main-location right"
+map Super+Control+Shift Down  send-layout-cmd rivertile "main-location bottom"
+map Super+Control+Shift Left  send-layout-cmd rivertile "main-location left"
+
+# Declare a passthrough mode. This mode has only a single mapping to return to
+# normal mode. This makes it useful for testing a nested wayland compositor
+riverctl declare-mode passthrough
+
+# Super+F11 to enter passthrough mode
+map Super F11 enter-mode passthrough
+
+# Super+F11 to return to normal mode
+riverctl map passthrough Super F11 enter-mode normal
+
+# Various media key mapping examples for both normal and locked mode which do
+# not have a modifier
+for mode in normal locked
+do
+    # Eject the optical drive (well if you still have one that is)
+    riverctl map $mode None XF86Eject spawn 'eject -T'
+
+    # Control pulse audio volume with pamixer (https://github.com/cdemoulins/pamixer)
+    riverctl map $mode None XF86AudioRaiseVolume  spawn 'swayosd-client --output-volume=+5'
+    riverctl map $mode None XF86AudioLowerVolume  spawn 'swayosd-client --output-volume=-5'
+    riverctl map $mode None XF86AudioMute         spawn 'swayosd-client --output-volume=mute-toggle'
+
+    # Control MPRIS aware media players with playerctl (https://github.com/altdesktop/playerctl)
+    riverctl map $mode None XF86AudioMedia spawn 'playerctl play-pause'
+    riverctl map $mode None XF86AudioPlay  spawn 'playerctl play-pause'
+    riverctl map $mode None XF86AudioPrev  spawn 'playerctl previous'
+    riverctl map $mode None XF86AudioNext  spawn 'playerctl next'
+
+    # Control screen backlight brightness with brightnessctl
+    riverctl map $mode None XF86MonBrightnessUp   spawn 'swayosd-client --brightness=+5'
+    riverctl map $mode None XF86MonBrightnessDown spawn 'swayosd-client --brightness=-5'
+done
+

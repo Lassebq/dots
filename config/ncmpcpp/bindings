@@ -1,0 +1,20 @@
+def_key "space"
+    pause
+
+def_key "shift-left"
+    previous
+
+def_key "shift-right"
+    next
+
+def_key "shift-down"
+    volume_down
+
+def_key "shift-up"
+    volume_up
+
+def_key "right"
+    seek_forward
+
+def_key "left"
+    seek_backward

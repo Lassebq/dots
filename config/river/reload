@@ -1,0 +1,6 @@
+#!/bin/sh
+
+~/.config/river/binds
+~/.config/river/config
+~/.config/river/colors
+

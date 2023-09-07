@@ -32,8 +32,8 @@ export JAVA_FONTS=/usr/share/fonts/TTF
 export JAVA_HOME=/usr/lib/jvm/default
 
 # Override paths with XDG Base Directories for apps which partially support it
-#export VSCODE_PORTABLE="$XDG_DATA_HOME"/vscode
-#export DOTNET_CLI_HOME="XDG_CACHE_HOME"/dotnet
+export VSCODE_PORTABLE="$XDG_DATA_HOME"/vscode
+export DOTNET_CLI_HOME="$XDG_CACHE_HOME"/dotnet
 export NUGET_PACKAGES="$XDG_CACHE_HOME"/NuGetPackages
 export XINITRC="$XDG_CONFIG_HOME"/X11/xinitrc
 export XSERVERRC="$XDG_CONFIG_HOME"/X11/xserverrc

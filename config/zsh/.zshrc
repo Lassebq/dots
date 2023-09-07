@@ -18,11 +18,13 @@ compinit -d "$XDG_CACHE_HOME/zsh/zcompdump-$ZSH_VERSION"
 zstyle ':completion:*' menu select cache-path "$XDG_CACHE_HOME/zsh/zcompcache"
 zstyle ':completion:*' list-colors "${(s.:.)LS_COLORS}"
 
-source "$ZDOTDIR/zsh-theme.zsh"
-source "$ZDOTDIR/zsh-shift-select.zsh"
-source "$ZDOTDIR/zsh-autosuggestions.zsh"
-source "$ZDOTDIR/zsh-key-bindings.zsh"
-source "$ZDOTDIR/zsh-aliases.zsh"
+setopt dotglob
+
+# Source plugins
+for plugin in "$ZDOTDIR/"*.zsh
+do
+    source "$plugin"
+done
 
 setopt HIST_EXPIRE_DUPS_FIRST
 setopt HIST_IGNORE_DUPS
@@ -54,6 +56,7 @@ add-zsh-hook preexec set_title
 stty werase ^H
 bindkey ^H backward-kill-word
 
+# Reload colors in linux console
 if [ "$TERM" = linux ]; then
     kill -SIGUSR1 $$
 fi
