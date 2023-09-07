@@ -37,7 +37,6 @@ checkpkgs=(
 "pipewire-pulse"
 "pipewire-jack"
 "pamixer"
-"pavucontrol"
 "brightnessctl"
 "rofi-lbonn-wayland-git"
 "rofi-calc"
@@ -72,10 +71,13 @@ checkpackages_extra=(
 "cava"
 "dunst"
 "fd"
-"lf"
+"lf-git"
 "hyprpicker"
 "wf-recorder"
 "wtype"
+"openssh"
+"pavucontrol"
+"man"
 "mpd"
 "mpv"
 "ncmpcpp"
@@ -438,6 +440,10 @@ fi
 
 # Resolve optional dependencies
 
+if array_contains "${installpkgs[*]}" "ncmpcpp"; then
+    installpkgs+=("mpd")
+fi
+
 if array_contains "${installpkgs[*]}" "mpd"; then
     installpkgs+=("mpd-mpris" "mpc")
 fi
@@ -507,12 +513,14 @@ read -r copyconf
 
 if [ "$copyconf" = y ] || [ "$copyconf" = l ]; then
     gsettings set org.gnome.desktop.interface font-name "JetBrainsMono NF 12"
-    sudo chsh -s /bin/"$shell" "$USER" || warning "Shell could not be changed"    
-    mkdir -p ~/.cache/zsh
-    mkdir -p ~/.local/share/mpd
-    # You can remove .zshenv from your $HOME as long you're using a Display Manager which sources .profile (For example, greetd)
-    # (NVM, it breaks agetty. Maybe there's a workaround, idk)
+    sudo chsh -s /bin/"$shell" "$USER" || warning "Shell could not be changed"
+    if pkg_installed mpd; then
+        mkdir -p ~/.local/share/mpd
+    fi
+    # Cleanup bash leftovers
+    rm -f ~/.bashrc ~/.bash_logout ~/.bash_profile ~/.bash_history ~/.lesshst
     if [ "$shell" = zsh ]; then 
+        mkdir -p ~/.cache/zsh
         ln -sfT ~/.config/zsh/.zshenv ~/.zshenv
     elif [ "$shell" = bash ]; then
         ln -sfT ~/.config/bash/.bashrc ~/.bashrc
