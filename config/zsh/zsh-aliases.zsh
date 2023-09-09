@@ -28,3 +28,6 @@ alias ll="ls -alG"
 alias ls="ls --color -F"
 alias file="file -Lb --mime-type"
 alias aliases="$EDITOR "'"'"$ZDOTDIR/zsh-aliases.zsh"'"'""
+if [ "$TERM" = linux ]; then
+    alias lf="lfcd -config $HOME/.config/lf/lfrc_tty"
+fi

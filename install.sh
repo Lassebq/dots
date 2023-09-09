@@ -6,7 +6,7 @@ preppkgs=(
 "git"
 )
 
-#TODO yay fucks up those packages so we will install them as soon as possible
+# yay fucks up those packages so we will install them as soon as possible
 importantpkgs=(
 "noto-fonts"
 "wireplumber"
@@ -43,6 +43,7 @@ checkpkgs=(
 "rofi-emoji"
 "ttf-jetbrains-mono-nerd"
 "xdg-utils"
+"gvfs"
 )
 
 riverpkgs=(
@@ -75,11 +76,13 @@ checkpackages_extra=(
 "hyprpicker"
 "wf-recorder"
 "wtype"
+"imv"
 "openssh"
 "pavucontrol"
 "man"
 "mpd"
 "mpv"
+"noto-fonts-cjk"
 "ncmpcpp"
 "neovim"
 "xdg-desktop-portal-termfilechooser-git"
@@ -131,7 +134,7 @@ desktops=(
 )
 
 vscode_themes=(
-"catppuccin.catppuccin-vsc"
+"Catppuccin.catppuccin-vsc"
 "arcticicestudio.nord-visual-studio-code"
 "sainnhe.everforest"
 "enkia.tokyo-night"
@@ -278,7 +281,7 @@ y_or_n || exit
 
 if [ -z "${BASH_SOURCE[0]}" ]; then
     if ! pkg_installed "git"; then
-        sudo pacman -Sy git
+        sudo pacman --noconfirm -Sy git
     fi
     git clone https://github.com/Lassebq/dots.git dots
     cd dots || fatal
@@ -317,8 +320,9 @@ if is_nvidia && ! pkg_installed nvidia; then
         yay -S --noconfirm "${installpkgs[@]}" || fatal "Failed to install!"
         sudo sed -i 's/MODULES=()/MODULES=(nvidia nvidia_modeset nvidia_uvm nvidia_drm)/' /etc/mkinitcpio.conf
         echo "options nvidia-drm modeset=1" | sudo tee -a /etc/modprobe.d/nvidia.conf
+        echo "options nvidia NVreg_PreserveVideoMemoryAllocations=1" | sudo tee -a /etc/modprobe.d/nvidia.conf
         sudo mkinitcpio -p linux
-	sudo systemctl enable nvidia-hibernate.service nvidia-persistenced.service nvidia-powerd.service nvidia-resume.service nvidia-suspend.service
+	    sudo systemctl enable nvidia-hibernate.service nvidia-persistenced.service nvidia-resume.service nvidia-suspend.service
     fi
 fi
 
@@ -413,7 +417,7 @@ for pkg in "${checkpackages_extra[@]}"; do
     fi
 done
 
-if (( ${#installpkgs[@]} )); then
+if (( ${#installpkgs1[@]} )); then
     echo "Extra packages:"
     i=1
     for pkg in "${installpkgs1[@]}"; do
@@ -452,8 +456,12 @@ if array_contains "${installpkgs[*]}" "mpv"; then
     installpkgs+=("mpv-mpris")
 fi
 
-if array_contains "${installpkgs[*]}" "lf"; then
-    installpkgs+=("imagemagick" "ffmpegthumbnailer" "bat")
+if array_contains "${installpkgs[*]}" "neovim"; then
+    installpkgs+=("npm")
+fi
+
+if array_contains "${installpkgs[*]}" "lf-git"; then
+    installpkgs+=("imagemagick" "ffmpegthumbnailer" "bat" "chafa")
 fi
 
 if array_contains "${installpkgs[*]}" "wine"; then
@@ -466,34 +474,34 @@ if array_contains "${installpkgs[*]}" "wine"; then
     enable_multilib
 fi
 
-printf "\n"
-echo "Following packages will be installed:"
-printf "$light_blue"
-i=1
-for pkg in "${installpkgs[@]}"
-do
-    printf "%s\n" "$pkg"
-    i=$((i+1))
-done | sort | column -c$(tput cols)
-printf "$default\n"
+if (( ${#installpkgs[@]} )); then
+    printf "\n"
+    echo "Following packages will be installed:"
+    printf "$light_blue"
+    i=1
+    for pkg in "${installpkgs[@]}"
+    do
+        printf "%s\n" "$pkg"
+        i=$((i+1))
+    done | sort | column -c$(tput cols)
+    printf "$default\n"
 
-read -n 1 -s -r -p "Press any key to continue"
-printf "\n"
+    read -n 1 -s -r -p "Press any key to continue"
+    printf "\n"
 
+    installpkgs1=()
+    for pkg in "${importantpkgs[@]}"; do
+        if array_contains "${installpkgs[*]}" "$pkg"; then
+            installpkgs1+=("$pkg")
+        fi
+    done
 
-installpkgs1=()
-for pkg in "${importantpkgs[@]}"; do
-    if array_contains "${installpkgs[@]}" "$pkg"; then
-        installpkgs1+=("$pkg")
-    fi
-done
-yay -Sy --noconfirm "${installpkgs1[@]}" || fatal "Failed to install packages!"
-
-yay -S --noconfirm "${installpkgs[@]}" || fatal "Failed to install packages!"
+    yay -Sy --noconfirm "${installpkgs1[@]}" || fatal "Failed to install packages!"
+    yay -S --noconfirm "${installpkgs[@]}" || fatal "Failed to install packages!"
+fi
 
 modify_env() {
-    #TODO slashes in a variable?
-    sed "s|\(export $1=\).*|\1\"$2\"|g" ~/.profile
+    sed --silent "s|\(export $1=\).*|\1\"$2\"|g" ~/.profile
 }
 
 write_script() {
@@ -506,14 +514,41 @@ if y_or_n; then
     cp -r "$HOME/.config" "$HOME/.config_BACKUP"
 fi
 
+link_contents=(
+"alacritty"
+"btop"
+"foot"
+"hypr"
+"kitty"
+"mpd"
+"ncmpcpp"
+"npm"
+"river"
+"rofi"
+"sway"
+"waybar"
+"wezterm"
+"zsh"
+)
+
+link_exclude=(
+"bottom"
+"cava"
+"Code"
+"firefox"
+)
+
 echo -e "Copy new config files? [\e[91mY\e[0mes | \e[91mN\e[0mo | Sym\e[91mL\e[0mink]:"
+
 read -r copyconf
 [ "$copyconf" = Y ] && copyconf=y
-[ "$copyconf" = N ] && copyconf=n
+[ "$copyconf" = L ] && copyconf=l
 
+# TODO gsettings don't save?
 if [ "$copyconf" = y ] || [ "$copyconf" = l ]; then
-    gsettings set org.gnome.desktop.interface font-name "JetBrainsMono NF 12"
+    gsettings set org.gnome.desktop.interface font-name "JetBrainsMono NF 12" || warning "Could not set font"
     sudo chsh -s /bin/"$shell" "$USER" || warning "Shell could not be changed"
+    mkdir -p ~/.config/
     if pkg_installed mpd; then
         mkdir -p ~/.local/share/mpd
     fi
@@ -527,6 +562,7 @@ if [ "$copyconf" = y ] || [ "$copyconf" = l ]; then
         ln -sfT ~/.config/bash/.bash_profile ~/.bash_profile
     fi
     cp -rf ./local/. ~/.local/
+
     # make .mozilla/firefox/$USER the default profile
     if [[ "$browser" = firefox* ]]; then
         mkdir -p ~/.mozilla/firefox/"$USER"
@@ -540,9 +576,10 @@ Default=1
 Default=$USER
 Locked=1
 " > ~/.mozilla/firefox/installs.ini
-        git clone https://github.com/black7375/Firefox-UI-Fix.git ~/.mozilla/firefox/"$USER"/chrome
-        cp ~/.mozilla/firefox/"$USER"/chrome/user.js ~/.mozilla/firefox/"$USER"/user.js
-        #TODO may need to tweak some options in user.js
+        
+        if [ ! -d ~/.mozilla/firefox/"$USER"/chrome ]; then
+            git clone https://github.com/black7375/Firefox-UI-Fix.git ~/.mozilla/firefox/"$USER"/chrome
+        fi
     fi
     # Set default browser
     case "$browser" in
@@ -555,15 +592,30 @@ Locked=1
     if [ "$copyconf" = y ]; then
         cp -r ./config/. ~/.config/
     elif [ "$copyconf" = l ]; then
-        ln -sf "$(realpath ./config)"/* ~/.config/
+        for conf in $(ls ./config)
+        do
+            if array_contains "${link_contents[*]}" "$conf"; then
+                mkdir -p ~/.config/"$conf"
+                files=($(find ./config/"$conf" -mindepth 1 -maxdepth 1))
+                for file in "${files[@]}"
+                do
+                    ln -sf "$(realpath "$file")" ~/.config/"$conf"
+                done
+            elif ! array_contains "${link_exclude[*]}" "$conf"; then
+                ln -sfT "$(realpath ./config/"$conf")" ~/.config/"$conf"
+            fi
+        done
     fi
     
     if [[ "$browser" = firefox* ]]; then
-        mv ~/.config/firefox/* ~/.mozilla/firefox/"$USER"/chrome/
-    else
-        rm -rf ~/.config/firefox
+        if [ "$copyconf" = y ]; then
+            cp -f ./config/firefox/* ~/.mozilla/firefox/"$USER"/chrome/
+        elif [ "$copyconf" = l ]; then
+            ln -sf $PWD/config/firefox/* ~/.mozilla/firefox/"$USER"/chrome/
+        fi
+        cp -f ~/.mozilla/firefox/"$USER"/chrome/user.js ~/.mozilla/firefox/"$USER"/user.js
     fi
-    mv ~/.config/profile ~/.profile
+    mv -f ~/.config/profile ~/.profile
     
     modify_env "TERMINAL" "$terminal"
 
@@ -574,12 +626,23 @@ Locked=1
     if [ -f ~/.profile ]; then
         source ~/.profile
     fi
+    
+    if [ -z "$VSCODE_PORTABLE" ]; then
+        for vscode in "Code" "Code - OSS" "VSCodium"
+        do
+            mkdir -p "$XDG_CONFIG_HOME/$vscode"
+            cp -rfF ./config/Code "$XDG_CONFIG_HOME/$vscode"
+        done
+    else
+        mkdir -p "$VSCODE_PORTABLE"
+        cp -rfT ./config/Code "$VSCODE_PORTABLE/user-data"
+    fi
 
     if [ -n "$ZDOTDIR" ]; then
         mkdir -p "$ZDOTDIR"
-        curl "https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/lib/key-bindings.zsh" -o "$ZDOTDIR/zsh-key-bindings.zsh"
-        curl "https://raw.githubusercontent.com/zsh-users/zsh-autosuggestions/master/zsh-autosuggestions.zsh" -o "$ZDOTDIR/zsh-autosuggestions.zsh"
-        curl "https://raw.githubusercontent.com/jirutka/zsh-shift-select/master/zsh-shift-select.plugin.zsh" -o "$ZDOTDIR/zsh-shift-select.zsh"
+        curl -s "https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/lib/key-bindings.zsh" -o "$ZDOTDIR/zsh-key-bindings.zsh"
+        curl -s "https://raw.githubusercontent.com/zsh-users/zsh-autosuggestions/master/zsh-autosuggestions.zsh" -o "$ZDOTDIR/zsh-autosuggestions.zsh"
+        curl -s "https://raw.githubusercontent.com/jirutka/zsh-shift-select/master/zsh-shift-select.plugin.zsh" -o "$ZDOTDIR/zsh-shift-select.zsh"
     fi
 
     write_script "$wallpapercmd" > ~/.local/bin/wallpaper
@@ -587,36 +650,37 @@ Locked=1
     ./change-theme.sh "$(basename "$(find themes/ -maxdepth 1 -mindepth 1 | head -1)")"
 fi
 
-if [ -z "$VSCODE_PORTABLE" ]; then
-    if [ -f "$XDG_CONFIG_HOME/Code/User/settings.json" ]; then
-        for vscode in "Code - OSS" "VSCodium"
-        do
-            mkdir -p "$XDG_CONFIG_HOME/$vscode/User"
-            cp -f "$XDG_CONFIG_HOME/Code/User/settings.json" "$XDG_CONFIG_HOME/$vscode/User/settings.json"
-        done
-    fi
-else
-    if [ -f "$XDG_CONFIG_HOME/Code/User/settings.json" ]; then
-        mkdir -p "$VSCODE_PORTABLE"
-        mv -T "$XDG_CONFIG_HOME/Code" "$VSCODE_PORTABLE/user-data"
-    fi
+if pkg_installed "code"; then
+    vscode_cmd=code
 fi
 
-if pkg_installed "code"; then
-    echo -n "Install VSCode themes?"
-    if y_or_n; then
-        for theme in "${vscode_themes[@]}"
-        do
-            code --install-extension "$theme"
-        done
-    fi
-elif pkg_installed "codium"; then
-    echo -n "Install VSCodium themes?"
-    if y_or_n; then
-        for theme in "${vscode_themes[@]}"
-        do
-            codium --install-extension "$theme"
-        done
+if pkg_installed "codium"; then
+    vscode_cmd=codium
+fi
+
+if [ -n "$vscode_cmd" ]; then
+    extensions=($("$vscode_cmd" --list-extensions 2>/dev/null))
+    allthemes=true
+    for theme in "${vscode_themes[@]}"
+    do
+        if ! array_contains "${extensions[*]}" "$theme"; then
+            allthemes=false
+            break
+        fi
+    done
+
+    if [ "$allthemes" = false ]; then
+        echo -n "Install VSCode themes?"
+        if y_or_n; then
+            install_extensions=()
+            for theme in "${vscode_themes[@]}"
+            do
+                install_extensions+=(--install-extension "$theme")
+            done
+            if (( ${#install_extensions[@]} )); then
+                "$vscode_cmd" "${install_extensions[@]}"
+            fi
+        fi
     fi
 fi
 

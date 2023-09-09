@@ -1,0 +1,5 @@
+# vim: filetype=bash
+source "~/.config/lf/lfrc"
+
+set icons!
+set promptfmt "\033[92m%u\033[0m@\033[94m%h\033[0m \033[34;1m%d\033[0m\033[1m%f\033[0m"

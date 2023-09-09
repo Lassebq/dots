@@ -27,6 +27,14 @@ image() {
     fi
 }
 
+text() {
+    if [ "$TERM" = linux ]; then
+        bat --color=always --paging=never --decorations=never --theme=base16 "$1"
+    else
+        bat --color=always --paging=never --decorations=never "$1"
+    fi
+}
+
 case "$file" in 
     *.avi|*.mp4|*.wmv|*.dat|*.3gp|*.ogv|*.mkv|*.mpg|*.mpeg|*.vob|*.fl[icv]|*.m2v|*.mov|*.webm|*.ts|*.mts|*.m4v|*.r[am]|*.qt|*.divx)
     [ ! -f "${CACHE}.jpg" ] && ffmpegthumbnailer -i "$1" -o "${CACHE}.jpg" -s 0 -q 5
@@ -40,13 +48,13 @@ if [[ "$mime" =~ ^image/ ]]; then
 fi
 
 if [[ "$mime" =~ ^text/ || "$mime" = application/json || "$mime" = application/x-ndjson || "$mime" = application/javascript ]]; then
-    bat --color=always --paging=never --decorations=never "$file"
+    text "$file"
     exit 0
 fi
 
 if [[ "$mime" = application/x-java-applet ]]; then
     [ ! -f "${CACHE}.java" ] && decompile "$file" > "${CACHE}.java"
-    bat --color=always --paging=never --decorations=never --language=java "${CACHE}.java"
+    text "${CACHE}.java"
     exit 0
 fi
 

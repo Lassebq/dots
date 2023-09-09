@@ -13,15 +13,17 @@ if [ ! -d themes ]; then
     exit 1
 fi
 
-interactive=false
-
 themes=(themes/*)
 
 selected_theme="$1"
 
-i=1
-if [ -z "$selected_theme" ]; then
+interactive=false
+if [[ "$-" = *i* ]]; then
     interactive=true
+fi
+
+if [ -z "$selected_theme" ] && [ "$interactive" = true ]; then
+    i=1
     echo "Select preferred theme:"
     for theme in "${themes[@]}"
     do
@@ -30,19 +32,18 @@ if [ -z "$selected_theme" ]; then
     done
     printf "Type the number of a theme in the list: "
     read -r selected_num
+    n=1
+    for theme in "${themes[@]}"
+    do
+        if [ $n = "$selected_num" ]; then
+            themepath=$(realpath "$theme")
+            break;
+        fi
+        n=$((n+1))
+    done
 else
     themepath=$(realpath "themes/$selected_theme")
 fi
-
-i=1
-for theme in "${themes[@]}"
-do
-    if [ $i = "$selected_num" ]; then
-        themepath=$(realpath "$theme")
-        break;
-    fi
-    i=$((i+1))
-done
 
 if [ ! -d "$themepath" ]; then
     echo "Theme doesn't exist."
@@ -61,6 +62,10 @@ if [ -z "$XDG_DATA_HOME" ]; then
     XDG_DATA_HOME=~/.local/share
 fi
 
+check_command() {
+    command -v "$1" &> /dev/null
+}
+
 set_nvim_theme() {
     if pidof nvim &> /dev/null; then
         ls "$XDG_RUNTIME_DIR"/nvim.*.0 \
@@ -77,10 +82,15 @@ select_wallpaper() {
     ./rofi-wallpaper "$1"
 }
 
-if [ "$interactive" = true ]; then
-    wallpaper=$(random_wallpaper)
+if [ "$interactive" = false ]; then
+    # DISPLAY is set in arch-chroot? Messes up install script
+    if [ -n "$WAYLAND_DISPLAY" ]; then
+        wallpaper="$(select_wallpaper "$themepath/wallpaper")"
+    else
+        wallpaper="$(random_wallpaper)"
+    fi
 else
-    wallpaper=$(select_wallpaper "$themepath/wallpaper")
+    wallpaper="$(random_wallpaper)"
 fi
 
 if [ -z "$wallpaper" ]; then
@@ -92,18 +102,18 @@ echo "Applying theme..."
 
 # Apply sway config changes first to not mess with wallpaper animation
 mkdir -p "$XDG_CONFIG_HOME"/sway
-if [ -f "$themepath/sway" ] && command -v sway &> /dev/null; then
+if [ -f "$themepath/sway" ] && check_command sway; then
     ln -sf "$themepath"/sway "$XDG_CONFIG_HOME"/sway/colors
-    if pidof sway; then
+    if pidof sway > /dev/null; then
         echo "Reloading sway config"
         sway reload &> /dev/null
     fi
 fi
 
 mkdir -p "$XDG_CONFIG_HOME"/river
-if [ -f "$themepath/river" ] && command -v river &> /dev/null; then
+if [ -f "$themepath/river" ] && check_command river; then
     ln -sf "$themepath"/river "$XDG_CONFIG_HOME"/river/colors
-    if pidof river; then
+    if pidof river > /dev/null && [ -n "$WAYLAND_DISPLAY" ]; then
         echo "Reloading river config"
         "$XDG_CONFIG_HOME"/river/colors
     fi
@@ -112,10 +122,9 @@ fi
 echo "Setting wallpaper: $(basename "$wallpaper")"
 
 restart_wayland_app() {
-    echo "${cmd[@]}"
     local pids="$1"
     for pid in "${pids[@]}"; do
-        eval "$(cat /proc/$pid/environ | tr '\0' '\n' | grep ^WAYLAND_DISPLAY=)"
+        eval "export $(cat /proc/$pid/environ | tr '\0' '\n' | grep ^WAYLAND_DISPLAY=)"
         "${cmd[@]}" &> /dev/null &
         kill "$pid"
     done
@@ -160,14 +169,22 @@ if [ -f "$themepath/theme" ]; then
     if [ -f "$GTK2_RC_FILES" ]; then
         sed -i -E 's/(gtk-theme-name=")(.*)(")/\1'"$GTK_THEME"'\3/g' "$GTK2_RC_FILES"
     fi
-    sed -i -E 's/(gtk-theme-name=)(.*)/\1'"$GTK_THEME"'/g' "$XDG_CONFIG_HOME"/gtk-3.0/settings.ini
+    if [ -f "$XDG_CONFIG_HOME"/gtk-3.0/settings.ini ]; then
+        sed -i -E 's/(gtk-theme-name=)(.*)/\1'"$GTK_THEME"'/g' "$XDG_CONFIG_HOME"/gtk-3.0/settings.ini
+    fi
 
-    for vscode in "Code" "Code - OSS" "VSCodium"
-    do
-        if [ -f "$XDG_CONFIG_HOME/$vscode/User/settings.json" ] && conf=$(jq ".[\"workbench.colorTheme\"] = \"$VSCODE_THEME\"" "$XDG_CONFIG_HOME/Code - OSS/User/settings.json"); then
-            echo "$conf" > "$XDG_CONFIG_HOME/$vscode/User/settings.json"
+    if [ -n "$VSCODE_PORTABLE" ]; then        
+        if [ -f "$VSCODE_PORTABLE/user-data/User/settings.json" ] && conf=$(jq ".[\"workbench.colorTheme\"] = \"$VSCODE_THEME\"" "$VSCODE_PORTABLE/user-data/User/settings.json"); then
+            echo "$conf" > "$VSCODE_PORTABLE/user-data/User/settings.json"
         fi
-    done
+    else
+        for vscode in "Code" "Code - OSS" "VSCodium"
+        do
+            if [ -f "$XDG_CONFIG_HOME/$vscode/User/settings.json" ] && conf=$(jq ".[\"workbench.colorTheme\"] = \"$VSCODE_THEME\"" "$XDG_CONFIG_HOME/$vscode/User/settings.json"); then
+                echo "$conf" > "$XDG_CONFIG_HOME/$vscode/User/settings.json"
+            fi
+        done
+    fi
     
     if [ "$NVIM_THEME" ]; then
         set_nvim_theme "$NVIM_THEME"
@@ -175,16 +192,16 @@ if [ -f "$themepath/theme" ]; then
 fi
 
 # foot
-if [ -f "$themepath/foot.ini" ] && command -v foot &> /dev/null; then
+if [ -f "$themepath/foot.ini" ] && check_command foot; then
     mkdir -p "$XDG_CONFIG_HOME"/foot
     echo "Reloading foot"
     ln -sf "$themepath"/foot.ini "$XDG_CONFIG_HOME"/foot/theme.ini
     # There's a script in $ZDOTDIR/zsh-theme.zsh which parses current foot config and applies colors using OSC4/11
-    pkill -SIGUSR1 -x -P "$(pidof foot | sed 's/ /,/g')" zsh &> /dev/null
+    pkill -SIGUSR1 -x -P "$(pidof foot | tr ' ' ',')" zsh &> /dev/null
 fi
 
 # kitty
-if [ -f "$themepath/kitty.conf" ] && command -v kitty &> /dev/null; then
+if [ -f "$themepath/kitty.conf" ] && check_command kitty; then
     mkdir -p "$XDG_CONFIG_HOME"/kitty/themes
     echo "Reloading kitty"
     ln -sf "$themepath"/kitty.conf "$XDG_CONFIG_HOME"/kitty/themes/custom.conf
@@ -192,21 +209,21 @@ if [ -f "$themepath/kitty.conf" ] && command -v kitty &> /dev/null; then
 fi
 
 # alacritty
-if [ -f "$themepath/alacritty.yml" ] && command -v alacritty &> /dev/null; then
+if [ -f "$themepath/alacritty.yml" ] && check_command alacritty; then
     mkdir -p "$XDG_CONFIG_HOME"/alacritty
     echo "Reloading alacritty"
     ln -sf "$themepath"/alacritty.yml "$XDG_CONFIG_HOME"/alacritty/theme.yml
 fi
 
 # wezterm
-if [ -f "$themepath/wezterm.lua" ] && command -v wezterm &> /dev/null; then
+if [ -f "$themepath/wezterm.lua" ] && check_command wezterm; then
     mkdir -p "$XDG_CONFIG_HOME"/wezterm
     echo "Reloading wezterm"
     ln -sf "$themepath"/wezterm.lua "$XDG_CONFIG_HOME"/wezterm/colors.lua
 fi
 
 # cava
-if [ -f "$themepath/cava" ] && command -v cava &> /dev/null; then
+if [ -f "$themepath/cava" ] && check_command cava; then
     mkdir -p "$XDG_CONFIG_HOME"/cava
     echo "Reloading cava"
     cp -f config/cava/config "$XDG_CONFIG_HOME"/cava/config
@@ -215,7 +232,7 @@ if [ -f "$themepath/cava" ] && command -v cava &> /dev/null; then
 fi
 
 # bottom
-if command -v btm &> /dev/null; then
+if check_command btm; then
     mkdir -p "$XDG_CONFIG_HOME"/bottom
     cp -f config/bottom/bottom.toml "$XDG_CONFIG_HOME"/bottom/bottom.toml
     if [ -f "$themepath/bottom.toml" ]; then
@@ -234,21 +251,20 @@ if [ -f "$themepath/hyprland.conf" ]; then
 fi
 
 # Waybar
-if [ -f "$themepath/waybar.css" ] && command -v waybar &> /dev/null; then
+if [ -f "$themepath/waybar.css" ] && check_command waybar; then
     mkdir -p "$XDG_CONFIG_HOME"/waybar
     echo "Reloading waybar"
     ln -sf "$themepath"/waybar.css "$XDG_CONFIG_HOME"/waybar/colors.css
     pkill -USR2 -x waybar &> /dev/null &
 fi
 
-# TODO read profile path from .mozilla/firefox/profiles.ini
-if [ -d ~/.mozilla/firefox/lassebq/chrome ]; then
+if [ -d ~/.mozilla/firefox/$USER/chrome ]; then
     if [[ "$wallpaper" == *.jpg || "$wallpaper" == *.jpeg ]]; then
-        rm -f ~/.mozilla/firefox/lassebq/chrome/background.png
-        ln -f "$wallpaper" ~/.mozilla/firefox/lassebq/chrome/background.jpg
+        rm -f ~/.mozilla/firefox/$USER/chrome/background.png
+        ln -f "$wallpaper" ~/.mozilla/firefox/$USER/chrome/background.jpg
     elif [[ "$wallpaper" == *.png ]]; then        
-        rm -f ~/.mozilla/firefox/lassebq/chrome/background.jpg
-        ln -f "$wallpaper" ~/.mozilla/firefox/lassebq/chrome/background.png
+        rm -f ~/.mozilla/firefox/$USER/chrome/background.jpg
+        ln -f "$wallpaper" ~/.mozilla/firefox/$USER/chrome/background.png
     fi
 fi
 
@@ -259,22 +275,22 @@ if [ -f /tmp/firefox-remote.pid ]; then
 fi
 
 # btop
-mkdir -p "$XDG_CONFIG_HOME"/btop/themes
-if [ -f "$themepath/btop.theme" ]; then
+if [ -f "$themepath/btop.theme" ] && check_command btop; then
+    mkdir -p "$XDG_CONFIG_HOME"/btop/themes
     ln -sf "$themepath"/btop.theme "$XDG_CONFIG_HOME"/btop/themes/custom.theme
 fi
 # TODO use sed to replace color_theme in btop.conf (Maybe)
 
 # dunst
-mkdir -p "$XDG_CONFIG_HOME"/dunst
-if [ -f "$themepath/dunstrc" ]; then
+if [ -f "$themepath/dunstrc" ] && check_command dunst; then
+    mkdir -p "$XDG_CONFIG_HOME"/dunst
     ln -sf "$themepath"/dunstrc "$XDG_CONFIG_HOME"/dunst/dunstrc
     pkill -x dunst &> /dev/null &
 fi
 
 # swaync
-mkdir -p "$XDG_CONFIG_HOME"/swaync
-if [ -f "$themepath/swaync.css" ]; then
+if [ -f "$themepath/swaync.css" ] && check_command swaync; then
+    mkdir -p "$XDG_CONFIG_HOME"/swaync
     ln -sf "$themepath"/swaync.css "$XDG_CONFIG_HOME"/swaync/style.css
     if pidof swaync; then
         swaync-client -rs
@@ -282,13 +298,13 @@ if [ -f "$themepath/swaync.css" ]; then
 fi
 
 # rofi
-if [ -f "$themepath/rofi.rasi" ]; then
+if [ -f "$themepath/rofi.rasi" ] && check_command rofi; then
     mkdir -p "$XDG_CONFIG_HOME"/rofi
     ln -sf "$themepath"/rofi.rasi "$XDG_CONFIG_HOME"/rofi/colors.rasi
 fi
 
 # bat
-if command -v bat &> /dev/null; then
+if check_command bat; then
     if [ -f "$themepath/bat.tmTheme" ]; then
         mkdir -p "$XDG_CONFIG_HOME"/bat/themes
         ln -sf "$themepath"/bat.tmTheme "$XDG_CONFIG_HOME"/bat/themes/custom.tmTheme

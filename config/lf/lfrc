@@ -34,13 +34,6 @@ map <esc> :{{unselect; clear;}}
 
 cmd open $~/.config/lf/opener "$f"
 
-&{{
-    if [[ "$TERM" = linux ]]; then
-        command lf -remote "send $id :set icons!"
-        command lf -remote "send $id :set promptfmt \"\033[92m%u\033[0m@\033[94m%h\033[0m \033[34;1m%d\033[0m\033[1m%f\033[0m\""
-    fi
-}}
-
 # Using shell-pipe because with shell it "flickers"
 cmd mkexec %{{
     if [ -x $f ];

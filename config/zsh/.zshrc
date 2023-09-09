@@ -5,6 +5,7 @@ function _prompt() {
 
 eval "$(dircolors ~/.config/lf/colors)"
 if [ "$TERM" = "linux" ]; then
+    export PAGER="bat -S -p --theme=base16 --color=always"
     PROMPT='$(_prompt)'
 else
     eval "$(starship init zsh)"
@@ -46,7 +47,11 @@ set_title() {
 }
 
 set_cursor() {
-    echo -en "\e[0 q"
+    if [ "$TERM" = linux ]; then
+        echo -en "\e[?2c"
+    else
+        echo -en "\e[0 q"
+    fi
 }
 
 autoload -Uz add-zsh-hook
