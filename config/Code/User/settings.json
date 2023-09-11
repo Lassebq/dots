@@ -8,6 +8,5 @@
   "extensions.autoUpdate": false,
   "path-intellisense.absolutePathToWorkspace": false,
   "path-intellisense.showHiddenFiles": true,
-  "zenMode.centerLayout": false,
-  "workbench.colorTheme": "Catppuccin Mocha"
+  "zenMode.centerLayout": false
 }

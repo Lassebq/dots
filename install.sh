@@ -87,6 +87,8 @@ checkpackages_extra=(
 "neovim"
 "xdg-desktop-portal-termfilechooser-git"
 "polkit-gnome"
+"psf-unifont"
+"gpm"
 "wine"
 )
 
@@ -544,9 +546,8 @@ read -r copyconf
 [ "$copyconf" = Y ] && copyconf=y
 [ "$copyconf" = L ] && copyconf=l
 
-# TODO gsettings don't save?
 if [ "$copyconf" = y ] || [ "$copyconf" = l ]; then
-    gsettings set org.gnome.desktop.interface font-name "JetBrainsMono NF 12" || warning "Could not set font"
+    dbus-launch --exit-with-session gsettings set org.gnome.desktop.interface font-name "JetBrainsMono NF 12" || warning "Could not set font"
     sudo chsh -s /bin/"$shell" "$USER" || warning "Shell could not be changed"
     mkdir -p ~/.config/
     if pkg_installed mpd; then
@@ -595,6 +596,7 @@ Locked=1
         for conf in $(ls ./config)
         do
             if array_contains "${link_contents[*]}" "$conf"; then
+                rm -rf ~/.config/"$conf"
                 mkdir -p ~/.config/"$conf"
                 files=($(find ./config/"$conf" -mindepth 1 -maxdepth 1))
                 for file in "${files[@]}"
@@ -602,6 +604,7 @@ Locked=1
                     ln -sf "$(realpath "$file")" ~/.config/"$conf"
                 done
             elif ! array_contains "${link_exclude[*]}" "$conf"; then
+                rm -rf ~/.config/"$conf"
                 ln -sfT "$(realpath ./config/"$conf")" ~/.config/"$conf"
             fi
         done

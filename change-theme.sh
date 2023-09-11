@@ -163,9 +163,9 @@ fi
 if [ -f "$themepath/theme" ]; then
     echo "Applying GTK theme"
     source "$themepath/theme"
-    gsettings set org.gnome.desktop.interface color-scheme "$COLOR_SCHEME"
-    gsettings set org.gnome.desktop.interface gtk-theme "$GTK_THEME"
-    gsettings set org.gnome.desktop.wm.preferences theme "$GTK_THEME"
+    dbus-launch --exit-with-session gsettings set org.gnome.desktop.interface color-scheme "$COLOR_SCHEME"
+    dbus-launch --exit-with-session gsettings set org.gnome.desktop.interface gtk-theme "$GTK_THEME"
+    dbus-launch --exit-with-session gsettings set org.gnome.desktop.wm.preferences theme "$GTK_THEME"
     if [ -f "$GTK2_RC_FILES" ]; then
         sed -i -E 's/(gtk-theme-name=")(.*)(")/\1'"$GTK_THEME"'\3/g' "$GTK2_RC_FILES"
     fi
@@ -258,13 +258,13 @@ if [ -f "$themepath/waybar.css" ] && check_command waybar; then
     pkill -USR2 -x waybar &> /dev/null &
 fi
 
-if [ -d ~/.mozilla/firefox/$USER/chrome ]; then
+if [ -d ~/.mozilla/firefox/"$USER"/chrome ]; then
     if [[ "$wallpaper" == *.jpg || "$wallpaper" == *.jpeg ]]; then
-        rm -f ~/.mozilla/firefox/$USER/chrome/background.png
-        ln -f "$wallpaper" ~/.mozilla/firefox/$USER/chrome/background.jpg
+        rm -f ~/.mozilla/firefox/"$USER"/chrome/background.png
+        ln -f "$wallpaper" ~/.mozilla/firefox/"$USER"/chrome/background.jpg
     elif [[ "$wallpaper" == *.png ]]; then        
-        rm -f ~/.mozilla/firefox/$USER/chrome/background.jpg
-        ln -f "$wallpaper" ~/.mozilla/firefox/$USER/chrome/background.png
+        rm -f ~/.mozilla/firefox/"$USER"/chrome/background.jpg
+        ln -f "$wallpaper" ~/.mozilla/firefox/"$USER"/chrome/background.png
     fi
 fi
 

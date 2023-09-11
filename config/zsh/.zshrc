@@ -1,6 +1,12 @@
 setopt promptsubst
 function _prompt() {
-    printf "%%{\e[92m%%}%s%%{\e[0m%%}@%%{\e[94m%%}%s%%{\e[0m%%} %s $ " "${USER}" "${HOST}" "${PWD/#$HOME/~}"
+    local LAST_EXIT_CODE=$?
+    if [[ $LAST_EXIT_CODE -ne 0 ]]; then
+        prompt_color=31
+    else
+        prompt_color=32
+    fi
+    printf "%%{\e[92m%%}%s%%{\e[0m%%}@%%{\e[94m%%}%s%%{\e[0m%%} %s %%{\e[%dm%%}$%%{\e[0m%%} " "${USER}" "${HOST}" "${PWD/#$HOME/~}" "$prompt_color"
 }
 
 eval "$(dircolors ~/.config/lf/colors)"
