@@ -31,8 +31,6 @@
         "pulseaudio",
         "tray",
         "custom/updates",
-        "custom/weather",
-        "custom/notification",
         "clock",
         "custom/power_btn"
     ],

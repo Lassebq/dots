@@ -8,12 +8,22 @@ if lspci | grep -E "(VGA|3D).*NVIDIA" > /dev/null; then
 fi
 
 export MOZ_ENABLE_WAYLAND=1
+export OBSIDIAN_USE_WAYLAND=1
 
 export TERMINAL=foot
 export EDITOR=nvim
 export PAGER="bat -S -p --color=always"
-export MANPAGER="less --use-color"
+export MANPAGER="less"
 export GPG_TTY=$(tty)
+
+export LESS_TERMCAP_mb=$'\e[1;35m'
+export LESS_TERMCAP_md=$'\e[1;36m'
+export LESS_TERMCAP_me=$'\e[0m'
+export LESS_TERMCAP_se=$'\e[0m'
+export LESS_TERMCAP_so=$'\e[7;1;32m'
+export LESS_TERMCAP_ue=$'\e[0m'
+export LESS_TERMCAP_us=$'\e[1;34m'
+export GROFF_NO_SGR=1
 
 # XDG Base directories
 export XDG_CONFIG_HOME="$HOME"/.config
@@ -24,7 +34,7 @@ export XDG_STATE_HOME="$HOME"/.local/state
 export HISTSIZE=100
 export SAVEHIST=100
 
-export QT_QPA_PLATFORMTHEME=qt6ct
+export QT_QPA_PLATFORMTHEME=gtk2
 export WINEARCH=win64
 export LESSHISTFILE=-
 export JAVA_FONTS=/usr/share/fonts/TTF

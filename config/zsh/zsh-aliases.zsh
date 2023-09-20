@@ -1,4 +1,4 @@
-lfcd () {
+lfcd() {
     tmp="$(mktemp)"
     # `command` is needed in case `lfcd` is aliased to `lf`
     command lf -last-dir-path="$tmp" "$@"
@@ -27,6 +27,7 @@ alias la="ls -A"
 alias ll="ls -alG"
 alias ls="ls --color -F"
 alias file="file -Lb --mime-type"
+alias trash="gio trash"
 alias aliases="$EDITOR "'"'"$ZDOTDIR/zsh-aliases.zsh"'"'""
 if [ "$TERM" = linux ]; then
     alias lf="lfcd -config $HOME/.config/lf/lfrc_tty"

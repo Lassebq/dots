@@ -390,7 +390,7 @@ fi
 
 case "$bgutil" in
     "swaybg")
-        wallpapercmd='swaybg -i ~/.cache/swaybg/img &';;
+        wallpapercmd='swaybg -m fill -o "*" -i ~/.cache/swaybg/img &';;
     "swww")
         wallpapercmd='swww init && swww img ~/.cache/swaybg/img';;
     "wbg")

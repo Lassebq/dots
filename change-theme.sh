@@ -74,6 +74,19 @@ set_nvim_theme() {
     echo "vim.cmd.colorscheme \"$1\"" > "$XDG_CONFIG_HOME/nvim/lua/theme.lua"
 }
 
+set_gtk_theme() {
+    gsettings set org.gnome.desktop.interface gtk-theme "$1"
+    gsettings set org.gnome.desktop.wm.preferences theme "$1"
+    if [ -f "$GTK2_RC_FILES" ]; then
+        sed -i -E 's/(gtk-theme-name=")(.*)(")/\1'"$1"'\3/g' "$GTK2_RC_FILES"
+    elif [ -f "$HOME/.gtkrc-2.0" ]; then
+        sed -i -E 's/(gtk-theme-name=")(.*)(")/\1'"$1"'\3/g' "$HOME/.gtkrc-2.0"
+    fi
+    if [ -f "$XDG_CONFIG_HOME"/gtk-3.0/settings.ini ]; then
+        sed -i -E 's/(gtk-theme-name=)(.*)/\1'"$1"'/g' "$XDG_CONFIG_HOME"/gtk-3.0/settings.ini
+    fi
+}
+
 random_wallpaper() {
     find "$(realpath "$themepath/wallpaper")" -maxdepth 1 -type f | shuf -n 1
 }
@@ -163,15 +176,9 @@ fi
 if [ -f "$themepath/theme" ]; then
     echo "Applying GTK theme"
     source "$themepath/theme"
-    dbus-launch --exit-with-session gsettings set org.gnome.desktop.interface color-scheme "$COLOR_SCHEME"
-    dbus-launch --exit-with-session gsettings set org.gnome.desktop.interface gtk-theme "$GTK_THEME"
-    dbus-launch --exit-with-session gsettings set org.gnome.desktop.wm.preferences theme "$GTK_THEME"
-    if [ -f "$GTK2_RC_FILES" ]; then
-        sed -i -E 's/(gtk-theme-name=")(.*)(")/\1'"$GTK_THEME"'\3/g' "$GTK2_RC_FILES"
-    fi
-    if [ -f "$XDG_CONFIG_HOME"/gtk-3.0/settings.ini ]; then
-        sed -i -E 's/(gtk-theme-name=)(.*)/\1'"$GTK_THEME"'/g' "$XDG_CONFIG_HOME"/gtk-3.0/settings.ini
-    fi
+    # Detect chroot and use `dbus-launch --exit-with-session` there
+    gsettings set org.gnome.desktop.interface color-scheme "$COLOR_SCHEME"
+    set_gtk_theme "$GTK_THEME"
 
     if [ -n "$VSCODE_PORTABLE" ]; then        
         if [ -f "$VSCODE_PORTABLE/user-data/User/settings.json" ] && conf=$(jq ".[\"workbench.colorTheme\"] = \"$VSCODE_THEME\"" "$VSCODE_PORTABLE/user-data/User/settings.json"); then
@@ -196,8 +203,13 @@ if [ -f "$themepath/foot.ini" ] && check_command foot; then
     mkdir -p "$XDG_CONFIG_HOME"/foot
     echo "Reloading foot"
     ln -sf "$themepath"/foot.ini "$XDG_CONFIG_HOME"/foot/theme.ini
-    # There's a script in $ZDOTDIR/zsh-theme.zsh which parses current foot config and applies colors using OSC4/11
-    pkill -SIGUSR1 -x -P "$(pidof foot | tr ' ' ',')" zsh &> /dev/null
+    zsh_pids=($(pgrep -x -P "$(pidof foot | tr ' ' ',')" zsh))
+    kill -SIGUSR1 "${zsh_pids[*]}"
+    apply_theme="$(zsh -c 'TERM=foot; source $ZDOTDIR/zsh-theme.zsh; apply_theme')"
+    for zsh_pid in "${zsh_pids[@]}"
+    do
+        echo -n "$apply_theme" >> /proc/$zsh_pid/fd/0
+    done
 fi
 
 # kitty
@@ -285,7 +297,7 @@ fi
 if [ -f "$themepath/dunstrc" ] && check_command dunst; then
     mkdir -p "$XDG_CONFIG_HOME"/dunst
     ln -sf "$themepath"/dunstrc "$XDG_CONFIG_HOME"/dunst/dunstrc
-    pkill -x dunst &> /dev/null &
+    #pkill -x dunst &> /dev/null &
 fi
 
 # swaync

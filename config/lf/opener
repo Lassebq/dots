@@ -31,4 +31,4 @@ if [[ "$mime" = application/x-java-applet ]]; then
     exit 0
 fi
 
-xdg-open "$file"
+xdg-open "$file" &> /dev/null

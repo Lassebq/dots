@@ -25,7 +25,8 @@ image() {
     elif [ "$TERM" = linux ]; then
         chafa --symbols "block+solid+space+border" --animate=false -f symbols -s "$2x$3" "$1"
     else
-        chafa --symbols "+sextant" --animate=false -f symbols -s "$2x$3" "$1"
+        # sextant makes images noisy for some reason
+        chafa --symbols "block+solid+space+border" --animate=false -f symbols -s "$2x$3" "$1"
     fi
 }
 

@@ -11,6 +11,7 @@
     
     "hyprland/window": {
         "format": "{}",
+        "icon": false,
         "max-length": 10
     },
 

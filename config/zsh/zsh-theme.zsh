@@ -95,8 +95,7 @@ apply_foot_theme() {
     fi
 }
 
-
-TRAPUSR1() {
+apply_theme() {
     if [[ "$TERM" = foot || "$TERM" = linux ]]; then
         [ "$TERM" = foot ] && echo -en "\e]112"
         apply_foot_theme "$XDG_CONFIG_HOME/foot/foot.ini"

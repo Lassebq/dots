@@ -26,6 +26,9 @@ user_pref("layout.css.has-selector.enabled", true);
 user_pref("extensions.pocket.enabled", false);
 user_pref("browser.newtabpage.activity-stream.section.highlights.includePocket", false);
 user_pref("services.sync.prefs.sync-seen.browser.newtabpage.activity-stream.section.highlights.includePocket", false);
+user_pref("media.videocontrols.picture-in-picture.video-toggle.enabled", false);
+user_pref("browser.sessionstore.restore_on_demand", false);
+
 
 user_pref("userChrome.hidden.urlbar_iconbox", true);
 
