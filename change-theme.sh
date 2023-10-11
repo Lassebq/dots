@@ -74,16 +74,56 @@ set_nvim_theme() {
     echo "vim.cmd.colorscheme \"$1\"" > "$XDG_CONFIG_HOME/nvim/lua/theme.lua"
 }
 
+set_gtk_property() {
+    # $1 property $2 value
+    if [ -f "$GTK2_RC_FILES" ]; then
+        if grep -q "^$1=" "$GTK2_RC_FILES"; then
+            sed -i -E "s/($1=\")(.*)(\")/\1$2\3/g" "$GTK2_RC_FILES"
+        else
+            echo "$1=\"$2\"" >> "$GTK2_RC_FILES"
+        fi
+    elif [ -f "$HOME/.gtkrc-2.0" ]; then
+        sed -i -E "s/($1=\")(.*)(\")/\1$2\3/g" "$HOME/.gtkrc-2.0"
+    elif [ -n "$GTK2_RC_FILES" ]; then        
+        mkdir -p "$(dirname "$GTK2_RC_FILES")"
+        echo "$1=\"$2\"" >> "$GTK2_RC_FILES"
+    fi
+    
+    if [ -f "$XDG_CONFIG_HOME"/gtk-3.0/settings.ini ]; then
+        if grep -q "^$1=" "$XDG_CONFIG_HOME"/gtk-3.0/settings.ini; then
+            sed -i -E "s/($1=)(.*)/\1$2/g" "$XDG_CONFIG_HOME"/gtk-3.0/settings.ini
+        else
+            echo "$1=$2" >> "$XDG_CONFIG_HOME"/gtk-3.0/settings.ini
+        fi
+    else
+        mkdir -p "$XDG_CONFIG_HOME"/gtk-3.0
+        echo "[Settings]" >> "$XDG_CONFIG_HOME"/gtk-3.0/settings.ini
+        echo "$1=$2" >> "$XDG_CONFIG_HOME"/gtk-3.0/settings.ini
+    fi
+}
+
+set_icon_theme() {
+    gsettings set org.gnome.desktop.interface icon-theme "$1"
+    set_gtk_property "gtk-icon-theme-name" "$1"
+}
+
 set_gtk_theme() {
     gsettings set org.gnome.desktop.interface gtk-theme "$1"
     gsettings set org.gnome.desktop.wm.preferences theme "$1"
-    if [ -f "$GTK2_RC_FILES" ]; then
-        sed -i -E 's/(gtk-theme-name=")(.*)(")/\1'"$1"'\3/g' "$GTK2_RC_FILES"
-    elif [ -f "$HOME/.gtkrc-2.0" ]; then
-        sed -i -E 's/(gtk-theme-name=")(.*)(")/\1'"$1"'\3/g' "$HOME/.gtkrc-2.0"
-    fi
-    if [ -f "$XDG_CONFIG_HOME"/gtk-3.0/settings.ini ]; then
-        sed -i -E 's/(gtk-theme-name=)(.*)/\1'"$1"'/g' "$XDG_CONFIG_HOME"/gtk-3.0/settings.ini
+    set_gtk_property "gtk-theme-name" "$1"
+}
+
+set_font() {
+    gsettings set org.gnome.desktop.interface font-name "$1"
+    set_gtk_property "gtk-font-name" "$1"
+}
+
+set_cursor() {
+    gsettings set org.gnome.desktop.interface cursor-theme "$1"
+    set_gtk_property "gtk-cursor-theme-name" "$1"
+    if [ -n "$2" ]; then 
+        gsettings set org.gnome.desktop.interface cursor-size "$2"
+        set_gtk_property "gtk-cursor-theme-size" "$2"
     fi
 }
 
@@ -164,7 +204,7 @@ if [ -f "$wallpaper" ]; then
             hyprctl hyprpaper unload ~/.cache/swaybg/img
             hyprctl hyprpaper preload ~/.cache/swaybg/img
             hyprctl hyprpaper wallpaper ,~/.cache/swaybg/img
-        elif kill "$(cat /run/user/1000/hyprpaper.lock)"; then
+        elif kill "$(cat /run/user/"$(id -u)"/hyprpaper.lock)"; then
             hyprpaper &
         fi
     fi
@@ -179,6 +219,12 @@ if [ -f "$themepath/theme" ]; then
     # Detect chroot and use `dbus-launch --exit-with-session` there
     gsettings set org.gnome.desktop.interface color-scheme "$COLOR_SCHEME"
     set_gtk_theme "$GTK_THEME"
+    if [ -n "$GTK_ICON_THEME" ]; then
+        set_icon_theme "$GTK_ICON_THEME"
+    fi
+    if [ -n "$CURSOR_THEME" ]; then
+        set_cursor "$CURSOR_THEME"
+    fi
 
     if [ -n "$VSCODE_PORTABLE" ]; then        
         if [ -f "$VSCODE_PORTABLE/user-data/User/settings.json" ] && conf=$(jq ".[\"workbench.colorTheme\"] = \"$VSCODE_THEME\"" "$VSCODE_PORTABLE/user-data/User/settings.json"); then
@@ -298,15 +344,6 @@ if [ -f "$themepath/dunstrc" ] && check_command dunst; then
     mkdir -p "$XDG_CONFIG_HOME"/dunst
     ln -sf "$themepath"/dunstrc "$XDG_CONFIG_HOME"/dunst/dunstrc
     #pkill -x dunst &> /dev/null &
-fi
-
-# swaync
-if [ -f "$themepath/swaync.css" ] && check_command swaync; then
-    mkdir -p "$XDG_CONFIG_HOME"/swaync
-    ln -sf "$themepath"/swaync.css "$XDG_CONFIG_HOME"/swaync/style.css
-    if pidof swaync; then
-        swaync-client -rs
-    fi
 fi
 
 # rofi

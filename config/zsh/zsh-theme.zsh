@@ -8,7 +8,7 @@ hbgesc="\033]17;#%s\007"
 colesc_l="\033]P%s%s"
 hex_array=({0..9} {A..F})
 
-apply_foot_theme() {
+function apply_foot_theme() {
     local group
     while IFS= read -r line
     do
@@ -95,7 +95,7 @@ apply_foot_theme() {
     fi
 }
 
-apply_theme() {
+function apply_theme() {
     if [[ "$TERM" = foot || "$TERM" = linux ]]; then
         [ "$TERM" = foot ] && echo -en "\e]112"
         apply_foot_theme "$XDG_CONFIG_HOME/foot/foot.ini"

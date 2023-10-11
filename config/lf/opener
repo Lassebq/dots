@@ -6,7 +6,7 @@ decompile() {
 }
 
 mime=$(file -Lb --mime-type "$file")
-if [[ "$mime" =~ ^image ]]; then
+if [[ "$mime" =~ ^image/ ]]; then
     if [ "$TERM" = "xterm-kitty" ]; then
         kitty +kitten icat --silent --stdin no --transfer-mode file "$file" < /dev/null > /dev/tty
     elif [[ "$TERM" = "foot" || -n "$KONSOLE_VERSION" ]]; then
@@ -16,7 +16,7 @@ if [[ "$mime" =~ ^image ]]; then
     exit 0
 fi
 
-if [[ "$mime" =~ ^text || "$mime" = application/json || "$mime" = application/x-ndjson || "$mime" = inode/x-empty || "$mime" = application/javascript ]]; then
+if [[ "$mime" =~ ^text/ || "$mime" = application/json || "$mime" = application/x-ndjson || "$mime" = inode/x-empty || "$mime" = application/javascript ]]; then
     $EDITOR "$file"
     exit 0
 fi

@@ -5,7 +5,7 @@ h=$3
 x=$4
 y=$5
 
-CACHE="$HOME/.cache/lf/thumbnail.$(stat --printf '%n\0%i\0%F\0%s\0%W\0%Y' \
+CACHE="$XDG_CACHE_HOME/lf/thumbnail.$(stat --printf '%n\0%i\0%F\0%s\0%W\0%Y' \
 	-- "$(readlink -f "$1")" | sha256sum | awk '{print $1}'))"
 
 mime=$(file -Lb --mime-type "$file")
@@ -23,7 +23,7 @@ image() {
         # Doesn't work
         wezterm imgcat --width "$2" --height "$3" "$1"
     elif [ "$TERM" = linux ]; then
-        chafa --symbols "block+solid+space+border" --animate=false -f symbols -s "$2x$3" "$1"
+        chafa --symbols "block+solid+space+border" --fill "space+solid+stripple" --animate=false -f symbols -s "$2x$3" "$1"
     else
         # sextant makes images noisy for some reason
         chafa --symbols "block+solid+space+border" --animate=false -f symbols -s "$2x$3" "$1"

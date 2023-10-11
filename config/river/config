@@ -3,7 +3,7 @@
 riverctl set-repeat 30 200
 riverctl keyboard-layout -options "grp:shift_caps_toggle" us,ru
 
-riverctl focus-follows-cursor always
+riverctl focus-follows-cursor normal
 
 inputs=($(riverctl list-inputs | grep "^pointer-" | grep -i "touchpad"))
 for input in "${inputs[@]}"

@@ -28,7 +28,11 @@ user_pref("browser.newtabpage.activity-stream.section.highlights.includePocket",
 user_pref("services.sync.prefs.sync-seen.browser.newtabpage.activity-stream.section.highlights.includePocket", false);
 user_pref("media.videocontrols.picture-in-picture.video-toggle.enabled", false);
 user_pref("browser.sessionstore.restore_on_demand", false);
-
+user_pref("browser.quitShortcut.disabled", true);
+user_pref("browser.urlbar.showSearchTerms.enabled", true);
+user_pref("browser.urlbar.showSearchTerms.featureGate", true);
+user_pref("browser.aboutConfig.showWarning", false);
+user_pref("browser.preferences.experimental", true);
 
 user_pref("userChrome.hidden.urlbar_iconbox", true);
 

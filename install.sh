@@ -643,6 +643,7 @@ Locked=1
 
     if [ -n "$ZDOTDIR" ]; then
         mkdir -p "$ZDOTDIR"
+        git clone "https://github.com/zsh-users/zsh-syntax-highlighting.git" "$ZDOTDIR/zsh-syntax-highlighting"
         curl -s "https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/lib/key-bindings.zsh" -o "$ZDOTDIR/zsh-key-bindings.zsh"
         curl -s "https://raw.githubusercontent.com/zsh-users/zsh-autosuggestions/master/zsh-autosuggestions.zsh" -o "$ZDOTDIR/zsh-autosuggestions.zsh"
         curl -s "https://raw.githubusercontent.com/jirutka/zsh-shift-select/master/zsh-shift-select.plugin.zsh" -o "$ZDOTDIR/zsh-shift-select.zsh"

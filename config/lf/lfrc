@@ -21,6 +21,7 @@ set previewer ~/.config/lf/previewer
 set cleaner ~/.config/lf/cleaner
 
 map <enter> :shell
+map <c-q> :quit
 map <c-z> :restore
 map <c-s> :calcdirsize
 map <c-c> :copy
@@ -44,7 +45,7 @@ cmd mkexec %{{
 }}
 
 cmd linktarget %{{
-    if [ -n $fx ]; then
+    if [ -n "$fx" ]; then
         ln -s $fx .
     fi
     lf -remote "send $id :reload"

@@ -29,6 +29,10 @@ get_kernel() {
     uname -r
 }
 
+get_hostname() {
+    uname -n
+}
+
 get_shell() {
     echo "${SHELL##*/}"
 }
@@ -70,6 +74,18 @@ get_uptime() {
     echo ${d:+$d }${h:+$h }$m
 }
 
+get_term() {
+    if [ "$TERM" = "xterm-kitty" ]; then
+        echo "kitty"
+        return
+    fi
+    if [ "$TERM" = "xterm*" ]; then
+        echo "xterm"
+        return
+    fi
+    echo "$TERM"
+}
+
 get_memory() {
     # MemUsed = Memtotal + Shmem - MemFree - Buffers - Cached - SReclaimable
     # Source: https://github.com/KittyKatt/screenFetch/issues/386#issuecomment-249312716
@@ -99,6 +115,10 @@ get_memory() {
     echo "$mem_used | $mem_total MiB"
 }
 
+get_cpu() {
+    lscpu | grep "^Model name:" | sed "s/Model name:\s*//g"
+}
+
 bold='\033[1m'
 default='\033[0m'
 red='\033[31m'
@@ -109,10 +129,10 @@ blue='\033[34m'
 magenta='\033[35m'
 black='\033[30m'
 
-icons=("" "" "󰌽" "󰌢" "" "" "󰏖" "󰍛")
-keys=("user" "hostname" "distro" "kernel" "uptime" "shell" "packages" "memory")
-colors=("$red" "$yellow" "$green" "$cyan" "$blue" "$magenta" "$red" "$yellow")
-values=("$USER" "$HOSTNAME" "$PRETTY_NAME" "$(get_kernel)" "$(get_uptime)" "$(get_shell)" "$(get_packages)" "$(get_memory)")
+icons=("" "" "󰌽" "󰌢" "" "" "󰏖" "" "" "󰍛")
+keys=("user" "hostname" "distro" "kernel" "uptime" "shell" "packages" "memory" "terminal" "cpu")
+colors=("$red" "$yellow" "$green" "$cyan" "$blue" "$magenta" "$red" "$yellow" "$green" "$cyan")
+values=("$(whoami)" "$(get_hostname)" "$PRETTY_NAME" "$(get_kernel)" "$(get_uptime)" "$(get_shell)" "$(get_packages)" "$(get_memory)" "$(get_term)" "$(get_cpu)")
 
 printn() {
     for ((i=1; i <= $2; i++))

@@ -3,5 +3,9 @@ if [[ "$-" = *i* ]] && [ "$TERM" = linux ] && [ -z "$TWDISPLAY" ]; then
     if [ -f "$font" ]; then
         setfont "$font"
     fi
-    if command -v fetch &> /dev/null; then fetch; fi
+fi
+
+if [[ "$-" = *i* ]] && [ "$TERM" = linux ]; then
+    #tmux
+    #exit
 fi

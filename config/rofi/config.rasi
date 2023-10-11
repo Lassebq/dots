@@ -9,12 +9,11 @@ configuration {
   case-sensitivity: false; 
   sorting-method: "fzf";
   hide-scrollbar: true;
-  display-drun: " 󰀘  Apps ";
-  display-run: "   Run ";
-  display-window: " 󰕰  Window";
-  display-Network: " 󰤨  Network";
-  display-emoji: " 󰱨 Emoji  ";
-  display-calc: "  Calc";
+  display-drun: " 󰀘 ";
+  display-run: "  ";
+  display-window: " 󰕰 ";
+  display-emoji: " 󰱨 ";
+  display-calc: "  ";
   sidebar-mode: true;
   hover-select: true;
 }
@@ -25,6 +24,8 @@ configuration {
 }
 
 #window {
+    width: 320px;
+    height: 400px;
     background-color: @background;
     border: 2 2 2 2;
     border-radius: 12 12 12 12;
@@ -126,6 +127,7 @@ configuration {
     text-color: @active-background;
 }
 #prompt {
+    font: "JetBrainsMono Nerd Font 12";
     spacing:    0;
     text-color: @active-background;
 }
@@ -133,6 +135,7 @@ configuration {
     children:   [ prompt,textbox-prompt-colon,entry,case-indicator ];
 }
 #textbox-prompt-colon {
+    font: "JetBrainsMono Nerd Font 12";
     expand:     false;
     str:        ":";
     margin:     0px 0.3em 0em 0em ;

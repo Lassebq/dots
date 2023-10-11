@@ -47,7 +47,7 @@ require("lazy").setup({
         priority = 1000,
     },
     {
-        "shaunsingh/nord.nvim",
+        "gbprod/nord.nvim",
         lazy = false,
         priority = 1000,
         config = function()
