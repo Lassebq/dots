@@ -6,3 +6,4 @@ wallpaper
 /usr/lib/xdg-desktop-portal-wlr &
 pkill -x swayidle; swayidle -C ~/.config/swayidle/river &
 swayosd-server &
+wlr-autorotate -m eDP-1 &

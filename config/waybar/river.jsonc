@@ -26,6 +26,7 @@
         "disk",
         "custom/separator_l",
         "battery",
+        "network",
         "idle_inhibitor",
         "pulseaudio",
         "tray",

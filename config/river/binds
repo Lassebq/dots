@@ -130,7 +130,7 @@ do
     riverctl map $mode None XF86AudioNext  spawn 'playerctl next'
 
     # Control screen backlight brightness with brightnessctl
-    riverctl map $mode None XF86MonBrightnessUp   spawn 'swayosd-client --brightness=+5'
-    riverctl map $mode None XF86MonBrightnessDown spawn 'swayosd-client --brightness=-5'
+    riverctl map $mode None XF86MonBrightnessUp   spawn 'brightnessctl set +5%'
+    riverctl map $mode None XF86MonBrightnessDown spawn 'brightnessctl set 5%-'
 done
 

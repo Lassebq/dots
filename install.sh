@@ -511,6 +511,34 @@ write_script() {
     echo "$1"
 }
 
+set_font() {
+    dbus-launch --exit-with-session gsettings set org.gnome.desktop.interface font-name "$1"
+    if [ -f "$GTK2_RC_FILES" ]; then
+        if grep "^gtk-font-name=" "$GTK2_RC_FILES"; then
+            sed -i -E 's/(gtk-font-name=")(.*)(")/\1'"$1"'\3/g' "$GTK2_RC_FILES"
+        else
+            echo "gtk-font-name=\"$1\"" >> "$GTK2_RC_FILES"
+        fi
+    elif [ -f "$HOME/.gtkrc-2.0" ]; then
+        sed -i -E 's/(gtk-font-name=")(.*)(")/\1'"$1"'\3/g' "$HOME/.gtkrc-2.0"
+    elif [ -n "$GTK2_RC_FILES" ]; then        
+        mkdir -p "$(dirname "$GTK2_RC_FILES")"
+        echo "gtk-font-name=$1" >> "$GTK2_RC_FILES"
+    fi
+    
+    if [ -f "$XDG_CONFIG_HOME"/gtk-3.0/settings.ini ]; then
+        if grep "^gtk-font-name=" "$XDG_CONFIG_HOME"/gtk-3.0/settings.ini; then
+            sed -i -E 's/(gtk-font-name=)(.*)/\1'"$1"'/g' "$XDG_CONFIG_HOME"/gtk-3.0/settings.ini
+        else
+            echo "gtk-font-name=$1" >> "$XDG_CONFIG_HOME"/gtk-3.0/settings.ini
+        fi
+    else
+        mkdir -p "$XDG_CONFIG_HOME"/gtk-3.0
+        echo "[Settings]" >> "$XDG_CONFIG_HOME"/gtk-3.0/settings.ini
+        echo "gtk-font-name=$1" >> "$XDG_CONFIG_HOME"/gtk-3.0/settings.ini
+    fi
+}
+
 echo -n "Backup config?"
 if y_or_n; then
     cp -r "$HOME/.config" "$HOME/.config_BACKUP"
@@ -547,7 +575,6 @@ read -r copyconf
 [ "$copyconf" = L ] && copyconf=l
 
 if [ "$copyconf" = y ] || [ "$copyconf" = l ]; then
-    dbus-launch --exit-with-session gsettings set org.gnome.desktop.interface font-name "JetBrainsMono NF 12" || warning "Could not set font"
     sudo chsh -s /bin/"$shell" "$USER" || warning "Shell could not be changed"
     mkdir -p ~/.config/
     if pkg_installed mpd; then
@@ -629,6 +656,7 @@ Locked=1
     if [ -f ~/.profile ]; then
         source ~/.profile
     fi
+    set_font "JetBrainsMono NF 12"
     
     if [ -z "$VSCODE_PORTABLE" ]; then
         for vscode in "Code" "Code - OSS" "VSCodium"
