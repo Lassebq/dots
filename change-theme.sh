@@ -5,51 +5,6 @@ if [ "$(id -u)" = 0 ]; then
     exit 1
 fi
 
-parent_path=$( cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P )
-cd "$parent_path" || exit
-
-if [ ! -d themes ]; then
-    echo "Could not find themes folder."
-    exit 1
-fi
-
-themes=(themes/*)
-
-selected_theme="$1"
-
-interactive=false
-if [[ "$-" = *i* ]]; then
-    interactive=true
-fi
-
-if [ -z "$selected_theme" ] && [ "$interactive" = true ]; then
-    i=1
-    echo "Select preferred theme:"
-    for theme in "${themes[@]}"
-    do
-        echo "$i. $(basename "$theme")"
-        i=$((i+1))
-    done
-    printf "Type the number of a theme in the list: "
-    read -r selected_num
-    n=1
-    for theme in "${themes[@]}"
-    do
-        if [ $n = "$selected_num" ]; then
-            themepath=$(realpath "$theme")
-            break;
-        fi
-        n=$((n+1))
-    done
-else
-    themepath=$(realpath "themes/$selected_theme")
-fi
-
-if [ ! -d "$themepath" ]; then
-    echo "Theme doesn't exist."
-    exit 1
-fi
-
 if [ -z "$XDG_CONFIG_HOME" ]; then
     XDG_CONFIG_HOME=~/.config
 fi
@@ -60,6 +15,82 @@ fi
 
 if [ -z "$XDG_DATA_HOME" ]; then
     XDG_DATA_HOME=~/.local/share
+fi
+
+parent_path=$( cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P )
+cd "$parent_path" || exit
+
+if [ ! -d themes ]; then
+    echo "Could not find themes folder."
+    exit 1
+fi
+
+readarray -t themes < <(find themes -maxdepth 1 -mindepth 1 -not -name template)
+
+autoselect=false
+if [ "$1" = "-a" ]; then
+    autoselect=true
+    shift 1
+fi
+
+selected_theme="$1"
+
+get_theme_folder_path() {
+    if [ -n "$WAYLAND_DISPLAY" ] && [ "$XDG_CURRENT_DESKTOP" != GNOME ]; then
+        rofi_select="$(for theme in "${themes[@]}"
+        do
+            echo "$(basename "$theme")"
+        done | sort -u | rofi -p "Choose a theme" -i -dmenu)"
+
+        if [ -z "$rofi_select" ]; then
+            return 1
+        fi
+
+        realpath "themes/$rofi_select"
+        return
+    elif [ -n "$DISPLAY" ]; then
+        themes2=()
+        for theme in "${themes[@]}"
+        do
+            themes2+=("$(basename "$theme")")
+        done
+        realpath "themes/$(zenity --title "Theme chooser" --height 400 --width 300 --text "Choose a theme" --list --column "Theme" "${themes2[@]}")"
+        return
+    else
+        i=1
+        echo "Select preferred theme:"
+        for theme in "${themes[@]}"
+        do
+            echo "$i. $(basename "$theme")"
+            i=$((i+1))
+        done
+        printf "Type the number of a theme in the list: "
+        read -r selected_num
+        n=1
+        for theme in "${themes[@]}"
+        do
+            if [ $n = "$selected_num" ]; then
+                realpath "$theme"
+                return
+            fi
+            n=$((n+1))
+        done
+    fi
+    return 1
+}
+
+if [ -z "$selected_theme" ] && [ "$autoselect" = false ]; then
+    themepath="$(get_theme_folder_path)"
+    if [ -z "$themepath" ]; then
+        exit
+    fi
+else
+    themepath="$([ -n "$selected_theme" ] || realpath "themes/$selected_theme")"
+fi
+
+if [ ! -d "$themepath" ]; then
+    echo "Theme doesn't exist."
+    exit 1
 fi
 
 check_command() {
@@ -74,74 +105,42 @@ set_nvim_theme() {
     echo "vim.cmd.colorscheme \"$1\"" > "$XDG_CONFIG_HOME/nvim/lua/theme.lua"
 }
 
-set_gtk_property() {
-    # $1 property $2 value
-    if [ -f "$GTK2_RC_FILES" ]; then
-        if grep -q "^$1=" "$GTK2_RC_FILES"; then
-            sed -i -E "s/($1=\")(.*)(\")/\1$2\3/g" "$GTK2_RC_FILES"
-        else
-            echo "$1=\"$2\"" >> "$GTK2_RC_FILES"
-        fi
-    elif [ -f "$HOME/.gtkrc-2.0" ]; then
-        sed -i -E "s/($1=\")(.*)(\")/\1$2\3/g" "$HOME/.gtkrc-2.0"
-    elif [ -n "$GTK2_RC_FILES" ]; then        
-        mkdir -p "$(dirname "$GTK2_RC_FILES")"
-        echo "$1=\"$2\"" >> "$GTK2_RC_FILES"
-    fi
-    
-    if [ -f "$XDG_CONFIG_HOME"/gtk-3.0/settings.ini ]; then
-        if grep -q "^$1=" "$XDG_CONFIG_HOME"/gtk-3.0/settings.ini; then
-            sed -i -E "s/($1=)(.*)/\1$2/g" "$XDG_CONFIG_HOME"/gtk-3.0/settings.ini
-        else
-            echo "$1=$2" >> "$XDG_CONFIG_HOME"/gtk-3.0/settings.ini
-        fi
-    else
-        mkdir -p "$XDG_CONFIG_HOME"/gtk-3.0
-        echo "[Settings]" >> "$XDG_CONFIG_HOME"/gtk-3.0/settings.ini
-        echo "$1=$2" >> "$XDG_CONFIG_HOME"/gtk-3.0/settings.ini
-    fi
-}
-
-set_icon_theme() {
-    gsettings set org.gnome.desktop.interface icon-theme "$1"
-    set_gtk_property "gtk-icon-theme-name" "$1"
-}
-
-set_gtk_theme() {
-    gsettings set org.gnome.desktop.interface gtk-theme "$1"
-    gsettings set org.gnome.desktop.wm.preferences theme "$1"
-    set_gtk_property "gtk-theme-name" "$1"
-}
-
-set_font() {
-    gsettings set org.gnome.desktop.interface font-name "$1"
-    set_gtk_property "gtk-font-name" "$1"
-}
-
-set_cursor() {
-    gsettings set org.gnome.desktop.interface cursor-theme "$1"
-    set_gtk_property "gtk-cursor-theme-name" "$1"
-    if [ -n "$2" ]; then 
-        gsettings set org.gnome.desktop.interface cursor-size "$2"
-        set_gtk_property "gtk-cursor-theme-size" "$2"
-    fi
-}
-
 random_wallpaper() {
-    find "$(realpath "$themepath/wallpaper")" -maxdepth 1 -type f | shuf -n 1
+    find "$(realpath "$themepath/wallpaper")" -mindepth 1 -maxdepth 1 -type f | shuf -n 1
+}
+
+rofi_wallpapers() {
+    for file in "$1"/*
+    do
+        if [ -f "$file" ]; then
+            printf "%s\0icon\037%s\n" "$(basename "$file")" "$(realpath "$file")"
+        fi
+    done
 }
 
 select_wallpaper() {
-    ./rofi-wallpaper "$1"
+    if [ -n "$WAYLAND_DISPLAY" ] && [ "$XDG_CURRENT_DESKTOP" != GNOME ]; then
+        selected_wallpaper="$(rofi_wallpapers "$1" | rofi -p "Choose a wallpaper" -i -dmenu -config "$XDG_CONFIG_HOME/rofi/images.rasi")"
+        if [ -n "$selected_wallpaper" ]; then
+            realpath "$themepath/wallpaper/$selected_wallpaper"
+            return
+        else
+            return 1
+        fi
+    elif [ -n "$DISPLAY" ]; then
+        wallpaper="$(find -L "$1" -mindepth 1 -maxdepth 1 -type f | head -1)"
+        zenity --file-selection --filename "$(realpath "$wallpaper")"
+    fi
+
+    if [ -z "$selected_wallpaper" ]; then
+        return 1;
+    fi
+
+    realpath "$1/$selected_wallpaper"
 }
 
-if [ "$interactive" = false ]; then
-    # DISPLAY is set in arch-chroot? Messes up install script
-    if [ -n "$WAYLAND_DISPLAY" ]; then
-        wallpaper="$(select_wallpaper "$themepath/wallpaper")"
-    else
-        wallpaper="$(random_wallpaper)"
-    fi
+if [ "$autoselect" = false ]; then
+    wallpaper="$(select_wallpaper "$themepath/wallpaper")"
 else
     wallpaper="$(random_wallpaper)"
 fi
@@ -186,6 +185,8 @@ restart_wayland_app() {
 if [ -f "$wallpaper" ]; then
     mkdir -p "$XDG_CACHE_HOME"/swaybg
     ln -sf "$wallpaper" "$XDG_CACHE_HOME"/swaybg/img
+    gsettings set org.gnome.desktop.background picture-uri "file://$(realpath "$wallpaper")"
+    gsettings set org.gnome.desktop.background picture-uri-dark "file://$(realpath "$wallpaper")"
     wbg_pids=($(pidof wbg))
     if [ -n "${wbg_pids[*]}" ]; then
         echo "Restarting wbg"
@@ -216,14 +217,18 @@ fi
 if [ -f "$themepath/theme" ]; then
     echo "Applying GTK theme"
     source "$themepath/theme"
-    # Detect chroot and use `dbus-launch --exit-with-session` there
-    gsettings set org.gnome.desktop.interface color-scheme "$COLOR_SCHEME"
-    set_gtk_theme "$GTK_THEME"
+    if [ "$COLOR_SCHEME" = "prefer-dark" ]; then
+        gtk-theme -d
+    elif [ "$COLOR_SCHEME" = "prefer-light" ]; then
+        gtk-theme -l
+    fi
+
+    gtk-theme -t "$GTK_THEME"
     if [ -n "$GTK_ICON_THEME" ]; then
-        set_icon_theme "$GTK_ICON_THEME"
+        gtk-theme -i "$GTK_ICON_THEME"
     fi
     if [ -n "$CURSOR_THEME" ]; then
-        set_cursor "$CURSOR_THEME"
+        gtk-theme -c "$CURSOR_THEME"
     fi
 
     if [ -n "$VSCODE_PORTABLE" ]; then        
@@ -239,23 +244,27 @@ if [ -f "$themepath/theme" ]; then
         done
     fi
     
-    if [ "$NVIM_THEME" ]; then
+    if [ -n "$NVIM_THEME" ]; then
         set_nvim_theme "$NVIM_THEME"
     fi
 fi
+
+gen-term-colors gnome-terminal "$themepath/term"
 
 # foot
 if [ -f "$themepath/foot.ini" ] && check_command foot; then
     mkdir -p "$XDG_CONFIG_HOME"/foot
     echo "Reloading foot"
     ln -sf "$themepath"/foot.ini "$XDG_CONFIG_HOME"/foot/theme.ini
-    zsh_pids=($(pgrep -x -P "$(pidof foot | tr ' ' ',')" zsh))
-    kill -SIGUSR1 "${zsh_pids[*]}"
-    apply_theme="$(zsh -c 'TERM=foot; source $ZDOTDIR/zsh-theme.zsh; apply_theme')"
-    for zsh_pid in "${zsh_pids[@]}"
-    do
-        echo -n "$apply_theme" >> /proc/$zsh_pid/fd/0
-    done
+    zsh_pids=($(pgrep -x -P "$(pidof foot | tr ' ' ',')" zsh 2>/dev/null))
+    if [ -n "${zsh_pids[*]}" ]; then 
+        kill -SIGUSR1 "${zsh_pids[*]}"
+        apply_theme="$(zsh -c 'TERM=foot; source $ZDOTDIR/zsh-theme.zsh; apply_theme')"
+        for zsh_pid in "${zsh_pids[@]}"
+        do
+            echo -n "$apply_theme" >> /proc/$zsh_pid/fd/0
+        done
+    fi
 fi
 
 # kitty
@@ -372,4 +381,3 @@ fi
 
 echo "Theme applied."
 exit 0
-

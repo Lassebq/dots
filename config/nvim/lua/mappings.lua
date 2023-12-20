@@ -17,6 +17,7 @@ vim.g.mapleader = " "
 
 vim.cmd("behave mswin")
 
+map("i", "<S-Delete>", "<cmd>delete<CR>", opts)
 map("i", "<C-y>", "<cmd>redo<CR>", opts)
 map("n", "<C-y>", "<cmd>redo<CR>", opts)
 map("i", "<C-z>", "<cmd>u<CR>", opts)

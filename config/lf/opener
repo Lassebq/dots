@@ -5,13 +5,26 @@ decompile() {
     java -jar /usr/share/java/cfr/cfr.jar "$1" | bat --language=java --color=always --paging=always --decorations=never
 }
 
+image() {
+    if [ "$TERM" = "xterm-kitty" ]; then
+        kitty +kitten icat --silent --stdin no --transfer-mode file "$1" < /dev/null > /dev/tty
+    elif [[ "$TERM" = "foot" || -n "$KONSOLE_VERSION" ]]; then
+        chafa --animate=false -f sixel -s "$1"
+    elif [ "$TERM_PROGRAM" = "vscode" ]; then
+        chafa --animate=false -f sixel -s --font-ratio=1/1 "$1"
+    elif [ "$TERM_PROGRAM" = "WezTerm" ]; then
+        wezterm imgcat "$1"
+    elif [ "$TERM" = linux ]; then
+        chafa --symbols "block+solid+space+border" --fill "space+solid+stripple" --animate=false -f symbols "$1"
+    else
+        # sextant makes images noisy for some reason
+        chafa --symbols "block+solid+space+border" --animate=false -f symbols "$1"
+    fi
+}
+
 mime=$(file -Lb --mime-type "$file")
 if [[ "$mime" =~ ^image/ ]]; then
-    if [ "$TERM" = "xterm-kitty" ]; then
-        kitty +kitten icat --silent --stdin no --transfer-mode file "$file" < /dev/null > /dev/tty
-    elif [[ "$TERM" = "foot" || -n "$KONSOLE_VERSION" ]]; then
-        chafa -f sixel "$1"
-    fi
+    image "$file"
     read -rsn1
     exit 0
 fi

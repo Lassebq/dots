@@ -1,4 +1,6 @@
 {
+    "output": "HDMI-A-1",
+
     "river/window": {
         "format": "{}",
         "max-length": 10
@@ -69,6 +71,27 @@
         "on-scroll-down": "hyprctl dispatch workspace +1",
         "persistent_workspaces": {
             "*": 9
+        },
+        "format": "{icon}",
+	    "format-icons": {
+            "1": "1",
+            "2": "2",
+            "3": "3",
+            "4": "4",
+            "5": "5",
+            "6": "6",
+            "7": "7",
+            "8": "8",
+            "9": "9",
+            "10": "1",
+            "11": "2",
+            "12": "3",
+            "13": "4",
+            "14": "5",
+            "15": "6",
+            "16": "7",
+            "17": "8",
+            "18": "9"
         }
     },
 
@@ -139,10 +162,10 @@
     },
 
     "network": {
-        "interface": "wlan0",
+        "interface": "enp3s0",
         "format": "{ifname}",
         "format-wifi": "{icon}",
-        "format-ethernet": "{ipaddr}/{cidr} 󰊗",
+        "format-ethernet": "",
         "format-disconnected": "", //An empty format will hide the module.
         "tooltip-format": "{ifname} via {gwaddr} 󰊗",
         "tooltip-format-wifi": "{essid} ({signalStrength}%) ",

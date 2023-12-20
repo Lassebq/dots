@@ -130,9 +130,9 @@ magenta='\033[35m'
 black='\033[30m'
 
 icons=("" "" "󰌽" "󰌢" "" "" "󰏖" "" "" "󰍛")
-keys=("user" "hostname" "distro" "kernel" "uptime" "shell" "packages" "memory" "terminal" "cpu")
+keys=("user" "hostname" "distro" "kernel" "uptime" "shell" "packages" "memory" "terminal")
 colors=("$red" "$yellow" "$green" "$cyan" "$blue" "$magenta" "$red" "$yellow" "$green" "$cyan")
-values=("$(whoami)" "$(get_hostname)" "$PRETTY_NAME" "$(get_kernel)" "$(get_uptime)" "$(get_shell)" "$(get_packages)" "$(get_memory)" "$(get_term)" "$(get_cpu)")
+values=("$(whoami)" "$(get_hostname)" "$PRETTY_NAME" "$(get_kernel)" "$(get_uptime)" "$(get_shell)" "$(get_packages)" "$(get_memory)" "$(get_term)")
 
 printn() {
     for ((i=1; i <= $2; i++))

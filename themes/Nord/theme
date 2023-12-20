@@ -3,4 +3,5 @@
 NVIM_THEME=nord
 VSCODE_THEME=Nord
 GTK_THEME=Nordic
+GTK_ICON_THEME=Nordzy-dark
 COLOR_SCHEME=default

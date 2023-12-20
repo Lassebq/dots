@@ -28,6 +28,7 @@
         "battery",
         "hyprland/language",
         "idle_inhibitor",
+        "network",
         "pulseaudio",
         "tray",
         "custom/updates",

@@ -1,7 +1,7 @@
 configuration {
   drun-display-format: "{icon} {name}";
   font: "JetBrainsMono Nerd Font 12";
-  modi: "window,run,drun,emoji,calc,";
+  modi: "run,drun,emoji,calc,";
   show-icons: true;
   eh: 1;
   location: 0;
@@ -17,7 +17,7 @@ configuration {
   sidebar-mode: true;
   hover-select: true;
 }
-@import "colors"
+@import "colors.rasi"
 
 * {
     transparent: #00000000;

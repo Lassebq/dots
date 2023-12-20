@@ -135,20 +135,20 @@ desktops=(
 "sway-git"
 )
 
-vscode_themes=(
-"Catppuccin.catppuccin-vsc"
-"arcticicestudio.nord-visual-studio-code"
-"sainnhe.everforest"
-"enkia.tokyo-night"
-"mvllow.rose-pine"
-)
-
 nvidiapkgs=(
 "linux-headers"
 "nvidia-dkms"
 "nvidia-settings"
 "libva"
 "libva-nvidia-driver-git"
+)
+
+vscode_themes=(
+"Catppuccin.catppuccin-vsc"
+"arcticicestudio.nord-visual-studio-code"
+"sainnhe.everforest"
+"enkia.tokyo-night"
+"mvllow.rose-pine"
 )
 
 array_contains() {
@@ -177,6 +177,80 @@ enable_multilib() {
     if ! grep -x "\[multilib\]\s*" /etc/pacman.conf > /dev/null; then
         ( echo "[multilib]"; echo "Include = /etc/pacman.d/mirrorlist" ) | sudo tee -a /etc/pacman.conf > /dev/null
     fi
+}
+
+install_firefox() {
+    # make .mozilla/firefox/$USER the default profile
+    if [[ "$browser" = firefox* ]]; then
+        mkdir -p ~/.mozilla/firefox/"$USER"
+
+echo "[Profile0]
+Name=$USER
+IsRelative=1
+Path=$USER
+Default=1
+" > ~/.mozilla/firefox/profiles.ini
+
+echo "[$(echo $RANDOM | sha1sum | head -c 16)]
+Default=$USER
+Locked=1
+" > ~/.mozilla/firefox/installs.ini
+        
+        if [ ! -d ~/.mozilla/firefox/"$USER"/chrome ]; then
+            git clone https://github.com/black7375/Firefox-UI-Fix.git ~/.mozilla/firefox/"$USER"/chrome
+        fi
+    fi
+    # Set default browser
+    case "$browser" in
+        "firefox" | "firefox-nightly" | "google-chrome" | "chromium")
+            xdg-settings set default-web-browser "$browser.desktop";;
+        "firefox-nightly-bin")
+            xdg-settings set default-web-browser "firefox-nightly.desktop";;
+    esac
+
+    if [[ "$browser" = firefox* ]]; then
+        if [ "$copyconf" = y ]; then
+            cp -f ./config/firefox/* ~/.mozilla/firefox/"$USER"/chrome/
+        elif [ "$copyconf" = l ]; then
+            ln -sf $PWD/config/firefox/* ~/.mozilla/firefox/"$USER"/chrome/
+        fi
+        cp -f ~/.mozilla/firefox/"$USER"/chrome/user.js ~/.mozilla/firefox/"$USER"/user.js
+    fi
+}
+
+install_theme_switcher() {
+    oldpwd=$(pwd)
+    tempdir=$(mktemp -d)
+    git clone "https://github.com/Lassebq/gtk-theme.git" "$tempdir"
+    cd "$tempdir" && sudo make install
+    rm -rf "$tempdir"
+    cd "$oldpwd"
+}
+
+install_gtk_themes() {
+    oldpwd=$(pwd)
+    mkdir -p "$XDG_DATA_HOME/themes"
+    git clone "https://github.com/EliverLara/Nordic.git" "$XDG_DATA_HOME/themes/Nordic"
+
+    tempdir=$(mktemp -d)
+    cd "$tempdir"
+    git clone "https://github.com/Fausto-Korpsvart/Everforest-GTK-Theme.git" .
+    cp -rf themes/Everforest-Dark-BL "$XDG_DATA_HOME/themes"
+    rm -rf "$tempdir"
+
+    tempdir=$(mktemp -d)
+    cd "$tempdir"
+    git clone "https://github.com/Fausto-Korpsvart/Rose-Pine-GTK-Theme.git" .
+    cp -rf themes/RosePine-Main-BL "$XDG_DATA_HOME/themes"
+    rm -rf "$tempdir"
+
+    tempdir=$(mktemp -d)
+    cd "$tempdir"
+    git clone "https://github.com/Fausto-Korpsvart/Tokyo-Night-GTK-Theme.git" .
+    cp -rf themes/Tokyonight-Dark-BL "$XDG_DATA_HOME/themes"
+    rm -rf "$tempdir"
+    
+    cd "$oldpwd"
 }
 
 bold='\033[1m'
@@ -230,6 +304,43 @@ find_missing_pkgs() {
             installpkgs+=("$pkg")
         fi
     done
+}
+
+install_vscode() {
+    local vscode_cmd
+    if pkg_installed "code"; then
+        vscode_cmd=code
+    fi
+
+    if pkg_installed "codium"; then
+        vscode_cmd=codium
+    fi
+
+    if [ -n "$vscode_cmd" ]; then
+        extensions=($("$vscode_cmd" --list-extensions 2>/dev/null))
+        local allthemes=true
+        for theme in "${vscode_themes[@]}"
+        do
+            if ! array_contains "${extensions[*]}" "$theme"; then
+                allthemes=false
+                break
+            fi
+        done
+
+        if [ "$allthemes" = false ]; then
+            echo -n "Install VSCode themes?"
+            if y_or_n; then
+                install_extensions=()
+                for theme in "${vscode_themes[@]}"
+                do
+                    install_extensions+=(--install-extension "$theme")
+                done
+                if (( ${#install_extensions[@]} )); then
+                    "$vscode_cmd" "${install_extensions[@]}"
+                fi
+            fi
+        fi
+    fi
 }
 
 fancy_fmt="%d. [$light_blue%s$default]\\n"
@@ -310,9 +421,15 @@ if ! pkg_installed "yay"; then
     git clone https://aur.archlinux.org/yay.git "$tempdir" || fatal
     cd "$tempdir" || fatal
     makepkg -si --noconfirm || fatal "Failed to install necessary packages!"
+    rm -rf "$tempdir"
 fi
 
 installpkgs=()
+
+is_nvidia
+echo $?
+! pkg_installed nvidia
+echo $?
 
 if is_nvidia && ! pkg_installed nvidia; then
     echo -e "Looks like you're using ${light_green}NVIDIA${default} graphics card."
@@ -502,43 +619,6 @@ if (( ${#installpkgs[@]} )); then
     yay -S --noconfirm "${installpkgs[@]}" || fatal "Failed to install packages!"
 fi
 
-modify_env() {
-    sed --silent "s|\(export $1=\).*|\1\"$2\"|g" ~/.profile
-}
-
-write_script() {
-    echo '#!/bin/sh'
-    echo "$1"
-}
-
-set_font() {
-    dbus-launch --exit-with-session gsettings set org.gnome.desktop.interface font-name "$1"
-    if [ -f "$GTK2_RC_FILES" ]; then
-        if grep "^gtk-font-name=" "$GTK2_RC_FILES"; then
-            sed -i -E 's/(gtk-font-name=")(.*)(")/\1'"$1"'\3/g' "$GTK2_RC_FILES"
-        else
-            echo "gtk-font-name=\"$1\"" >> "$GTK2_RC_FILES"
-        fi
-    elif [ -f "$HOME/.gtkrc-2.0" ]; then
-        sed -i -E 's/(gtk-font-name=")(.*)(")/\1'"$1"'\3/g' "$HOME/.gtkrc-2.0"
-    elif [ -n "$GTK2_RC_FILES" ]; then        
-        mkdir -p "$(dirname "$GTK2_RC_FILES")"
-        echo "gtk-font-name=$1" >> "$GTK2_RC_FILES"
-    fi
-    
-    if [ -f "$XDG_CONFIG_HOME"/gtk-3.0/settings.ini ]; then
-        if grep "^gtk-font-name=" "$XDG_CONFIG_HOME"/gtk-3.0/settings.ini; then
-            sed -i -E 's/(gtk-font-name=)(.*)/\1'"$1"'/g' "$XDG_CONFIG_HOME"/gtk-3.0/settings.ini
-        else
-            echo "gtk-font-name=$1" >> "$XDG_CONFIG_HOME"/gtk-3.0/settings.ini
-        fi
-    else
-        mkdir -p "$XDG_CONFIG_HOME"/gtk-3.0
-        echo "[Settings]" >> "$XDG_CONFIG_HOME"/gtk-3.0/settings.ini
-        echo "gtk-font-name=$1" >> "$XDG_CONFIG_HOME"/gtk-3.0/settings.ini
-    fi
-}
-
 echo -n "Backup config?"
 if y_or_n; then
     cp -r "$HOME/.config" "$HOME/.config_BACKUP"
@@ -568,6 +648,15 @@ link_exclude=(
 "firefox"
 )
 
+modify_env() {
+    sed --silent "s|\(export $1=\).*|\1\"$2\"|g" ~/.profile
+}
+
+write_script() {
+    echo '#!/bin/sh'
+    echo "$1"
+}
+
 echo -e "Copy new config files? [\e[91mY\e[0mes | \e[91mN\e[0mo | Sym\e[91mL\e[0mink]:"
 
 read -r copyconf
@@ -582,6 +671,7 @@ if [ "$copyconf" = y ] || [ "$copyconf" = l ]; then
     fi
     # Cleanup bash leftovers
     rm -f ~/.bashrc ~/.bash_logout ~/.bash_profile ~/.bash_history ~/.lesshst
+
     if [ "$shell" = zsh ]; then 
         mkdir -p ~/.cache/zsh
         ln -sfT ~/.config/zsh/.zshenv ~/.zshenv
@@ -589,33 +679,8 @@ if [ "$copyconf" = y ] || [ "$copyconf" = l ]; then
         ln -sfT ~/.config/bash/.bashrc ~/.bashrc
         ln -sfT ~/.config/bash/.bash_profile ~/.bash_profile
     fi
+    
     cp -rf ./local/. ~/.local/
-
-    # make .mozilla/firefox/$USER the default profile
-    if [[ "$browser" = firefox* ]]; then
-        mkdir -p ~/.mozilla/firefox/"$USER"
-        echo "[Profile0]
-Name=$USER
-IsRelative=1
-Path=$USER
-Default=1
-" > ~/.mozilla/firefox/profiles.ini
-	echo "[4F96D1932A9F858E]
-Default=$USER
-Locked=1
-" > ~/.mozilla/firefox/installs.ini
-        
-        if [ ! -d ~/.mozilla/firefox/"$USER"/chrome ]; then
-            git clone https://github.com/black7375/Firefox-UI-Fix.git ~/.mozilla/firefox/"$USER"/chrome
-        fi
-    fi
-    # Set default browser
-    case "$browser" in
-        "firefox" | "firefox-nightly" | "google-chrome" | "chromium")
-            xdg-settings set default-web-browser "$browser.desktop";;
-        "firefox-nightly-bin")
-            xdg-settings set default-web-browser "firefox-nightly.desktop";;
-    esac
 
     if [ "$copyconf" = y ]; then
         cp -r ./config/. ~/.config/
@@ -636,15 +701,11 @@ Locked=1
             fi
         done
     fi
-    
-    if [[ "$browser" = firefox* ]]; then
-        if [ "$copyconf" = y ]; then
-            cp -f ./config/firefox/* ~/.mozilla/firefox/"$USER"/chrome/
-        elif [ "$copyconf" = l ]; then
-            ln -sf $PWD/config/firefox/* ~/.mozilla/firefox/"$USER"/chrome/
-        fi
-        cp -f ~/.mozilla/firefox/"$USER"/chrome/user.js ~/.mozilla/firefox/"$USER"/user.js
-    fi
+
+    install_firefox
+    install_theme_switcher
+    install_gtk_themes
+
     mv -f ~/.config/profile ~/.profile
     
     modify_env "TERMINAL" "$terminal"
@@ -656,8 +717,11 @@ Locked=1
     if [ -f ~/.profile ]; then
         source ~/.profile
     fi
-    set_font "JetBrainsMono NF 12"
-    
+
+    gtk-theme -f "JetBrainsMono NF 12" -m "JetBrainsMono NF 12"
+    gsettings set org.gnome.desktop.peripherals.keyboard delay 200
+    gsettings set org.gnome.desktop.peripherals.keyboard repeat-interval 30
+
     if [ -z "$VSCODE_PORTABLE" ]; then
         for vscode in "Code" "Code - OSS" "VSCodium"
         do
@@ -672,48 +736,16 @@ Locked=1
     if [ -n "$ZDOTDIR" ]; then
         mkdir -p "$ZDOTDIR"
         git clone "https://github.com/zsh-users/zsh-syntax-highlighting.git" "$ZDOTDIR/zsh-syntax-highlighting"
-        curl -s "https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/lib/key-bindings.zsh" -o "$ZDOTDIR/zsh-key-bindings.zsh"
-        curl -s "https://raw.githubusercontent.com/zsh-users/zsh-autosuggestions/master/zsh-autosuggestions.zsh" -o "$ZDOTDIR/zsh-autosuggestions.zsh"
-        curl -s "https://raw.githubusercontent.com/jirutka/zsh-shift-select/master/zsh-shift-select.plugin.zsh" -o "$ZDOTDIR/zsh-shift-select.zsh"
+        curl -L -s "https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/lib/key-bindings.zsh" -o "$ZDOTDIR/zsh-key-bindings.zsh"
+        curl -L -s "https://raw.githubusercontent.com/zsh-users/zsh-autosuggestions/master/zsh-autosuggestions.zsh" -o "$ZDOTDIR/zsh-autosuggestions.zsh"
+        curl -L -s "https://raw.githubusercontent.com/jirutka/zsh-shift-select/master/zsh-shift-select.plugin.zsh" -o "$ZDOTDIR/zsh-shift-select.zsh"
     fi
 
     write_script "$wallpapercmd" > ~/.local/bin/wallpaper
     chmod +x ~/.local/bin/wallpaper
-    ./change-theme.sh "$(basename "$(find themes/ -maxdepth 1 -mindepth 1 | head -1)")"
+    ./change-theme.sh -a "$(basename "$(find themes/ -maxdepth 1 -mindepth 1 -not -name template | head -1)")"
 fi
 
-if pkg_installed "code"; then
-    vscode_cmd=code
-fi
-
-if pkg_installed "codium"; then
-    vscode_cmd=codium
-fi
-
-if [ -n "$vscode_cmd" ]; then
-    extensions=($("$vscode_cmd" --list-extensions 2>/dev/null))
-    allthemes=true
-    for theme in "${vscode_themes[@]}"
-    do
-        if ! array_contains "${extensions[*]}" "$theme"; then
-            allthemes=false
-            break
-        fi
-    done
-
-    if [ "$allthemes" = false ]; then
-        echo -n "Install VSCode themes?"
-        if y_or_n; then
-            install_extensions=()
-            for theme in "${vscode_themes[@]}"
-            do
-                install_extensions+=(--install-extension "$theme")
-            done
-            if (( ${#install_extensions[@]} )); then
-                "$vscode_cmd" "${install_extensions[@]}"
-            fi
-        fi
-    fi
-fi
+install_vscode
 
 echo "Setup complete."

@@ -5,5 +5,5 @@ exec autotiling
 exec waybar -c ~/.config/waybar/sway.jsonc
 exec wallpaper
 exec pkill -x swayidle
+exec kanshi
 exec swayidle -C ~/.config/swayidle/sway
-exec swayosd-server

@@ -2,5 +2,5 @@
 
 NVIM_THEME=tokyonight-night
 VSCODE_THEME="Tokyo Night"
-GTK_THEME=Tokyonight-Dark-B-LB
+GTK_THEME=Tokyonight-Dark-BL
 COLOR_SCHEME=default

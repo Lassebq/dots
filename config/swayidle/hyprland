@@ -1,4 +1,4 @@
-timeout 180 "hyprctl dispatch dpms off" resume "hyprctl dispatch dpms on"
-timeout 300 "loginctl lock-session; systemctl suspend"
+timeout 200 "hyprctl dispatch dpms off" resume "hyprctl dispatch dpms on"
+timeout 600 "loginctl lock-session; systemctl suspend"
 after-resume "hyprctl dispatch dpms on"
 lock "gtklock"

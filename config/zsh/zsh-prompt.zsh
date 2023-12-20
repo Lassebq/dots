@@ -42,7 +42,7 @@ function set_cursor() {
     if [ "$TERM" = linux ]; then
         echo -en "\e[?2c"
     else
-        echo -en "\e[0 q"
+        echo -en "\e[6 q"
     fi
 }
 

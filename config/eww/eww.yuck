@@ -1,0 +1,137 @@
+(defvar windowtitle "")
+(defvar workspace `["1","2","3","4","5","6","7","8","9"]`)
+(defpoll volume :interval "2s"
+  "pamixer --get-volume")
+
+(defwidget bar []
+    (centerbox
+        :orientation "h"
+        :class "base"
+        (left_modules)
+        (center_modules)
+        (right_modules)
+    )
+)
+
+(defwidget metric [label value onchange]
+  (box :orientation "h"
+       :class "metric"
+       :space-evenly false
+    (box :class "label" label)
+    (scale :min 0
+           :max 101
+           :active {onchange != ""}
+           :value value
+           :onchange onchange)))
+
+(defwidget left_modules []
+    (box
+        :halign "start"
+        (left_main)
+    )
+)
+
+(defwidget center_modules []
+    (box
+        :halign "center"
+        (titlebar)
+    )
+)
+
+(defwidget right_modules []
+    (box
+        :halign "end"
+        (right_main)
+    )
+)
+
+(defwidget titlebar []
+    (box
+        :space-evenly false
+        (box :class "slant_l")
+        (box
+            :class "title group"
+            (label :text windowtitle)
+        )
+        (box :class "slant_r")
+    )
+)
+
+(defwidget left_main []
+    (box
+        :space-evenly false
+        (box
+            :class "group"
+            (workspaces)
+        )
+        (box :class "slant_r")
+    )
+)
+
+(defwidget workspaces []
+    (box
+        :space-evenly false
+        (button
+            :width 20 :height 20
+            :class "launch"
+            (label :text "")
+        )
+        (for i in workspace
+            (button
+                :class "workspace"
+                :onclick "hyprctl dispatch workspace ${i}"
+                (label :text "${workspace[i - 1]}")
+            )
+        )
+    )
+)
+
+(defwidget right_main []
+    (box
+        :space-evenly false
+        (box :class "slant_l")
+        (box
+            :space-evenly false
+            :class "group"
+
+            (metric 
+                :label "" ;   
+                :value volume
+                :onchange "pamixer --set-volume {}"
+            )
+            (split)
+            (eventbox
+                :cursor "pointer"
+                (box :class "element" time)
+            )
+            (split)
+            (eventbox
+                :cursor "pointer"
+                (box :class "element poweroff" "")
+            )
+        )
+    )
+)
+
+(defwidget split []
+    (box
+        :class "split"
+        :width 2
+    )
+)
+
+(defpoll time :interval "10s"
+  "date '+%H:%M'")
+
+(defwindow main
+    :monitor 0
+    :geometry (geometry
+        :x "0px"
+        :y "0px"
+        :width "100%"
+        :height "38px"
+        :anchor "top center")
+    :exclusive true
+    :stacking "fg"
+    (bar)
+)

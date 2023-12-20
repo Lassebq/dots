@@ -156,6 +156,10 @@ require("lazy").setup({
 		config = function()
 			require 'colorizer'.setup {
                 'css';
+                'sh';
+                'yaml';
+                'conf';
+                'lua';
                 'javascript';
             }
 		end,

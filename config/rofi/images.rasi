@@ -1,4 +1,4 @@
-@import "~/.config/rofi/config.rasi"
+@import "config.rasi"
 
 window {
     width: 820px;

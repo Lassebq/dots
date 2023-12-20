@@ -19,6 +19,8 @@ image() {
         kitty +kitten icat --silent --stdin no --transfer-mode file --place "${2}x${3}@${4}x${5}" "$1" < /dev/null > /dev/tty
     elif [[ "$TERM" = "foot" || -n "$KONSOLE_VERSION" ]]; then
         chafa --animate=false -f sixel -s "$2x$3" "$1"
+    elif [ "$TERM_PROGRAM" = "vscode" ]; then
+        chafa --animate=false -f sixel -s "$2x$3" --font-ratio=1/1 "$1"
     elif [ "$TERM_PROGRAM" = "WezTerm" ]; then
         # Doesn't work
         wezterm imgcat --width "$2" --height "$3" "$1"

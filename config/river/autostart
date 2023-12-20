@@ -5,5 +5,5 @@ waybar -c ~/.config/waybar/river.jsonc >/dev/null 2>&1 &
 wallpaper
 /usr/lib/xdg-desktop-portal-wlr &
 pkill -x swayidle; swayidle -C ~/.config/swayidle/river &
-swayosd-server &
+kanshi &
 wlr-autorotate -m eDP-1 &

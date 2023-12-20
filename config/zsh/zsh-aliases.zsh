@@ -34,6 +34,14 @@ conf() {
     esac
 }
 
+cpr() {
+    rsync --archive -hh --partial --info=stats1,progress2 --modify-window=1 "$@"
+}
+
+mvr() {
+    rsync --archive -hh --partial --info=stats1,progress2 --modify-window=1 --remove-source-files "$@"
+}
+
 aliases() {
     "$EDITOR" "$ZDOTDIR/zsh-aliases.zsh"
 }

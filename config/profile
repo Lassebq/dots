@@ -1,20 +1,28 @@
+# Enable ccache
+export PATH="/usr/lib/ccache/bin:$PATH"
 # Append ~/.local/bin/ to PATH
 export PATH="$HOME/.local/bin:$PATH"
 
-if lspci | grep -E "(VGA|3D).*NVIDIA" > /dev/null; then
-    #export LIBVA_DRIVER_NAME=nvidia
-    #export __GLX_VENDOR_LIBRARY_NAME=nvidia
+if lsmod | grep "nvidia" > /dev/null; then
+    export LIBVA_DRIVER_NAME=nvidia
+    export __GLX_VENDOR_LIBRARY_NAME=nvidia
+    export GBM_BACKEND=nvidia-drm
     export WLR_NO_HARDWARE_CURSORS=1
 fi
 
 export MOZ_ENABLE_WAYLAND=1
-export OBSIDIAN_USE_WAYLAND=1
+if [ "$XDG_SESSION_TYPE" = wayland ]; then
+    export OBSIDIAN_USE_WAYLAND=1
+    # export SDL_VIDEODRIVER=wayland # Still very unstable and makes games not work
+fi
 
 export TERMINAL=foot
 export EDITOR=nvim
 export PAGER="bat -S -p --color=always"
 export MANPAGER="less"
 export GPG_TTY=$(tty)
+export GCC_COLORS='error=01;31:warning=01;35:note=01;36:caret=01;32:locus=01:quote=01'
+export MANGOHUD_CONFIG=core_load,gpu_temp,cpu_temp,gpu_fan,ram,vram,wine
 
 export LESS_TERMCAP_mb=$'\e[1;35m'
 export LESS_TERMCAP_md=$'\e[36m'
@@ -34,12 +42,15 @@ export XDG_STATE_HOME="$HOME"/.local/state
 export HISTSIZE=100
 export SAVEHIST=100
 
+export USE_CCACHE=1
+export CCACHE_DIR="$XDG_CACHE_HOME"/ccache
 export QT_QPA_PLATFORMTHEME=gtk2
 #export QT_STYLE_OVERRIDE=gtk2
 export WINEARCH=win64
 export LESSHISTFILE=-
 export JAVA_FONTS=/usr/share/fonts/TTF
 export JAVA_HOME=/usr/lib/jvm/default
+export PATH="$XDG_DATA_HOME/lutris/runners/wine/wine-ge-8-24-x86_64/bin:$PATH"
 
 # Override paths with XDG Base Directories for apps which partially support it
 export VSCODE_PORTABLE="$XDG_DATA_HOME"/vscode

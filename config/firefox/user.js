@@ -19,6 +19,7 @@ user_pref("browser.compactmode.show", true);
 
 // about:home Search Bar - 89 Above
 user_pref("browser.newtabpage.activity-stream.improvesearch.handoffToAwesomebar", false);
+user_pref("browser.tabs.closeWindowWithLastTab", false);
 
 // CSS's `:has()` selector #457 - 103 Above
 user_pref("layout.css.has-selector.enabled", true);
@@ -33,6 +34,13 @@ user_pref("browser.urlbar.showSearchTerms.enabled", true);
 user_pref("browser.urlbar.showSearchTerms.featureGate", true);
 user_pref("browser.aboutConfig.showWarning", false);
 user_pref("browser.preferences.experimental", true);
+user_pref("browser.startup.homepage", "about:home");
+user_pref("browser.newtabpage.activity-stream.showSponsored", false); // [FF58+] Pocket > Sponsored Stories
+user_pref("browser.newtabpage.activity-stream.showSponsoredTopSites", false); // [FF83+] Sponsored shortcuts
+user_pref("browser.newtabpage.activity-stream.default.sites", "");
+user_pref("extensions.getAddons.showPane", false); // [HIDDEN PREF]
+user_pref("extensions.htmlaboutaddons.recommendations.enabled", false);
+user_pref("browser.discovery.enabled", false);
 
 user_pref("userChrome.hidden.urlbar_iconbox", true);
 

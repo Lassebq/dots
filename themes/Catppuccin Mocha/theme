@@ -2,5 +2,5 @@
 
 NVIM_THEME="catppuccin-mocha"
 VSCODE_THEME="Catppuccin Mocha"
-GTK_THEME=Catppuccin-Mocha-Standard-Sky-dark
+GTK_THEME=Catppuccin-Mocha-Standard-Sky-Dark
 COLOR_SCHEME=default
