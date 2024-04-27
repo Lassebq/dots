@@ -1,9 +1,10 @@
 # Start applications on launch
 
+exec dex -ae sway
 exec dbus-update-activation-environment --systemd DISPLAY WAYLAND_DISPLAY SWAYSOCK XDG_CURRENT_DESKTOP
 exec autotiling
 exec waybar -c ~/.config/waybar/sway.jsonc
-exec wallpaper
+exec swaybg -i ~/.cache/swaybg/img
 exec pkill -x swayidle
 exec kanshi
 exec swayidle -C ~/.config/swayidle/sway

@@ -1,0 +1,356 @@
+#!/bin/sh
+# Yay this script is now POSIX compliant
+
+contains() {
+    while read -r line
+    do
+        if [ "$line" = "$1" ]; then
+            return 0
+        fi
+    done
+    return 1
+}
+
+invalid_theme() {
+    themes=""
+    while read -r line1; do
+        themes="$themes$line1
+" # bash can't threat \n properly when appending to a variable
+    done
+    echo "'$1' is not a valid theme"
+    echo "Available themes:"
+    for theme1 in $(echo $themes); do
+        echo "  $theme1"
+    done
+}
+
+array() {
+    for element in "$@"; do
+        echo "$element"
+    done
+}
+
+exclude="$(array "default" "hicolor" "locolor")"
+
+is_valid_theme() {
+    # Adwaita theme may not be present if gnome-themes-extra is not installed, but it's still valid
+    if [ "$(basename "$1")" = "Adwaita" ]; then
+        return 0
+    fi
+    
+    if echo "$exclude" | contains "${1##/*}"; then
+        return 1
+    fi
+    [ -d "$1" ] && [ -f "$1/index.theme" ]
+}
+
+list_themes() {
+    (for theme in $(find /usr/share/themes ~/.themes "$XDG_DATA_HOME"/themes -mindepth 1 -maxdepth 1 -type d 2>/dev/null)
+    do
+        if is_valid_theme "$theme"; then
+            basename "$theme"
+        fi
+    done; echo Adwaita) | sort -u
+}
+
+is_valid_icon_theme() {
+    # busybox ash does not work with "${1##/*}"
+    if echo "$exclude" | contains "$(basename "$1")"; then
+        return 1
+    fi
+    [ -d "$1" ] && [ -f "$1/index.theme" ] && grep -q "^Directories=" "$1/index.theme"
+}
+
+list_icons() {
+    for theme in $(find /usr/share/icons ~/.icons "$XDG_DATA_HOME"/icons -mindepth 1 -maxdepth 1 -type d 2>/dev/null)
+    do
+        if is_valid_icon_theme "$theme"; then
+            basename "$theme"
+        fi
+    done | sort -u
+}
+
+is_valid_cursor_theme() {
+    if echo "$exclude" | contains "$(basename "$1")"; then
+        return 1
+    fi
+    [ -d "$1" ] && [ -d "$1/cursors" ]
+}
+
+list_cursors() {
+    for theme in $(find /usr/share/icons ~/.icons "$XDG_DATA_HOME"/icons -mindepth 1 -maxdepth 1 -type d 2>/dev/null)
+    do
+        if is_valid_cursor_theme "$theme"; then
+            basename "$theme"
+        fi
+    done | sort -u
+}
+
+get_theme_path() {
+    if [ -d "$XDG_DATA_HOME/themes/$1" ]; then
+        echo "$XDG_DATA_HOME/themes/$1"
+        return 0
+    elif [ -d "$HOME/.themes/$1" ]; then
+        echo "$HOME/.themes/$1"
+        return 0
+    elif [ -d "/usr/share/themes/$1" ]; then
+        echo "/usr/share/themes/$1"
+        return 0
+    fi
+    echo "$1"
+    return 1
+}
+
+get_icon_theme_path() {
+    if [ -d "$XDG_DATA_HOME/icons/$1" ]; then
+        echo "$XDG_DATA_HOME/icons/$1"
+        return 0
+    elif [ -d "$HOME/.icons/$1" ]; then
+        echo "$HOME/.icons/$1"
+        return 0
+    elif [ -d "/usr/share/icons/$1" ]; then
+        echo "/usr/share/icons/$1"
+        return 0
+    fi
+    return 1
+}
+
+set_xfce_property() {
+    if ! command -v xfconf-query > /dev/null; then
+        return
+    fi
+    xfconf-query --create -c "$1" -p "$2" -t string -s "$3"
+}
+
+set_gtk_property() {
+    # $1 property $2 value
+    conf="$GTK2_RC_FILES"
+
+    if [ -f "$conf" ]; then
+        if grep -q "^$1=" "$conf"; then
+            sed -i -E "s/($1=\")(.*)(\")/\1$2\3/g" "$conf"
+        else
+            echo "$1=\"$2\"" >> "$conf"
+        fi
+    else
+        mkdir -p "$(dirname "$conf")"
+        echo "$1=\"$2\"" >> "$conf"
+    fi
+
+    for conf in "$XDG_CONFIG_HOME"/gtk-3.0/settings.ini "$XDG_CONFIG_HOME"/gtk-4.0/settings.ini; do
+        if [ -f "$conf" ]; then
+            if grep -q "^$1=" "$conf"; then
+                sed -i -E "s/($1=)(.*)/\1$2/g" "$conf"
+            else
+                echo "$1=$2" >> "$conf"
+            fi
+        else
+            mkdir -p "$(dirname "$conf")"
+            echo "[Settings]" >> "$conf"
+            echo "$1=$2" >> "$conf"
+        fi
+    done
+}
+
+set_icon_theme() {
+    theme_path="$(get_icon_theme_path "$1")"
+    if ! is_valid_icon_theme "$theme_path"; then
+        list_icons | invalid_theme "$1"
+        return 1
+    fi
+    gsettings set org.gnome.desktop.interface icon-theme "$1"
+    gsettings set org.cinnamon.desktop.interface icon-theme "$1" 2>/dev/null
+    gsettings set org.mate.interface icon-theme "$1" 2>/dev/null
+    set_gtk_property "gtk-icon-theme-name" "$1"
+    set_xfce_property "xsettings" "/Net/IconThemeName" "$1"
+}
+
+set_gtk_theme() {
+    theme_path="$(get_theme_path "$1")"
+    if ! is_valid_theme "$theme_path"; then
+        list_themes
+        return 1
+    fi
+    gsettings set org.gnome.desktop.interface gtk-theme "$1"
+    gsettings set org.gnome.desktop.wm.preferences theme "$1"
+    gsettings set org.cinnamon.desktop.interface gtk-theme "$1" 2>/dev/null
+    gsettings set org.cinnamon.desktop.wm.preferences theme "$1" 2>/dev/null
+    gsettings set org.mate.interface gtk-theme "$1" 2>/dev/null
+    if [ -d "$theme_path/gnome-shell" ] || [ "$1" = "Adwaita" ] || [ "$1" = "Adwaita-dark" ]; then
+        gsettings set org.gnome.shell.extensions.user-theme name "$1" 2>/dev/null
+    fi
+    if [ -d "$theme_path/cinnamon" ]; then
+        gsettings set org.cinnamon.theme name "$1" 2>/dev/null
+    fi
+    if [ -d "$theme_path/metacity-1" ]; then
+        gsettings set org.mate.Marco.general theme "$1" 2>/dev/null
+    fi
+    set_gtk_property "gtk-theme-name" "$1"
+    set_xfce_property "xsettings" "/Net/ThemeName" "$1"
+    if [ -d "$theme_path/xfwm4" ]; then
+        set_xfce_property "xfwm4" "/general/theme" "$1"
+    fi
+}
+
+is_valid_font() {
+    fontname=$(echo $1 | sed 's/ [0-9]*$//g')
+    [ -n "$fontname" ] && fc-list -f "%{family[0]}\n%{family[1]}\n" | grep -q -x "$fontname"
+}
+
+set_font() {
+    if ! is_valid_font "$1"; then
+        return 1;
+    fi
+    gsettings set org.gnome.desktop.interface font-name "$1"
+    gsettings set org.gnome.desktop.wm.preferences titlebar-font "$1"
+    gsettings set org.cinnamon.desktop.interface font-name "$1" 2>/dev/null
+    gsettings set org.cinnamon.desktop.wm.preferences titlebar-font "$1" 2>/dev/null
+    gsettings set org.mate.interface font-name "$1" 2>/dev/null
+    gsettings set org.mate.Marco.general titlebar-font "$1" 2>/dev/null
+    gsettings set org.mate.caja.desktop font "$1" 2>/dev/null
+    set_gtk_property "gtk-font-name" "$1"
+    set_xfce_property "xsettings" "/Gtk/FontName" "$1"
+    set_xfce_property "xfwm4" "/general/title_font" "$1"
+}
+
+set_monospace_font() {
+    if ! is_valid_font "$1"; then
+        return 1;
+    fi
+    gsettings set org.gnome.desktop.interface monospace-font-name "$1"
+    gsettings set org.mate.interface monospace-font-name "$1" 2>/dev/null
+    set_xfce_property "xsettings" "/Gtk/MonospaceFontName" "$1"
+}
+
+set_cursor() {
+    theme_path="$(get_icon_theme_path "$1")"
+    if ! is_valid_cursor_theme "$theme_path"; then
+        list_cursors | invalid_theme "$1"
+        return 1
+    fi
+    mkdir -p "$XDG_DATA_HOME/icons/default"
+    echo "[Icon Theme]
+Name=Default
+Comment=Default Cursor Theme
+Inherits=$1" > "$XDG_DATA_HOME/icons/default/index.theme"
+    gsettings set org.gnome.desktop.interface cursor-theme "$1"
+    set_gtk_property "gtk-cursor-theme-name" "$1"
+    set_xfce_property "xsettings" "/Gtk/CursorThemeName" "$1"
+    if [ -n "$2" ]; then 
+        gsettings set org.gnome.desktop.interface cursor-size "$2"
+        set_gtk_property "gtk-cursor-theme-size" "$2"
+        set_xfce_property "xsettings" "/Gtk/CursorThemeSize" "$2"
+        riverctl xcursor-theme "$1" "$2" > /dev/null 2>&1
+        hyprctl setcursor "$1" "$2" > /dev/null 2>&1
+    else
+        cursor_size="$(gsettings get org.gnome.desktop.interface cursor-size)"
+        if [ -z "$cursor_size" ]; then
+            cursor_size=24;
+        fi
+        riverctl xcursor-theme "$1" "$cursor_size" > /dev/null 2>&1
+        hyprctl setcursor "$1" "$cursor_size" > /dev/null 2>&1
+    fi
+    # Last exit code could be 1 sometimes
+    return 0
+}
+
+set_colorscheme() {
+    case "$1" in
+    light)
+        gsettings set org.gnome.desktop.interface color-scheme "prefer-$1"
+        gsettings set org.x.apps.portal color-scheme "prefer-$1"
+        set_gtk_property "gtk-application-prefer-dark-theme" "false"
+        ;;
+    dark)
+        gsettings set org.gnome.desktop.interface color-scheme "prefer-$1"
+        gsettings set org.x.apps.portal color-scheme "prefer-$1"
+        set_gtk_property "gtk-application-prefer-dark-theme" "true"
+        ;;
+    default)
+        gsettings set org.gnome.desktop.interface color-scheme "$1"
+        gsettings set org.x.apps.portal color-scheme "$1"
+        ;;
+    *)
+        return 1
+        ;;
+    esac
+}
+
+is_param() {
+    case "$1" in
+        -*)
+            return 0;;
+    esac
+    return 1
+}
+
+main() {
+    if [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
+        echo "Usage:"
+        echo "  $(basename "$0") --theme [theme-name]"
+        echo "  $(basename "$0") --icon [icon-theme-name]"
+        echo "  $(basename "$0") --cursor [cursor-theme-name] [cursor-theme-size]"
+        echo "  $(basename "$0") --font [font-name size]"
+        echo "  $(basename "$0") --monofont [monospace-font-name size]"
+        echo "  $(basename "$0") --colorscheme [default|dark|light]"
+        echo
+        echo "You can also use multiple parameters per command:"
+        echo "  $(basename "$0") --font \"JetBrainsMono NF 12\" --theme Nordic"
+        exit 1
+    fi
+
+    if [ -z "$XDG_DATA_HOME" ]; then
+        XDG_DATA_HOME=~/.local/share
+    fi
+    if [ -z "$XDG_CONFIG_HOME" ]; then
+        XDG_CONFIG_HOME=~/.config
+    fi
+    if [ -z "$GTK2_RC_FILES" ]; then
+        GTK2_RC_FILES="$HOME/.gtkrc-2.0"
+    fi
+
+    while [ -n "$1" ]; do
+        case "$1" in
+            "-t"|"--theme")
+                set_gtk_theme "$2" || exit 1
+                shift 2
+                ;;
+            "-i"|"--icon")
+                set_icon_theme "$2" || exit 1
+                shift 2
+                ;;
+            "-c"|"--cursor")
+                cursor_theme="$2"
+                cursor_size="$3"
+                if [ -z "$cursor_theme" ]; then
+                    shift 1
+                elif [ -z "$cursor_size" ] || is_param "$cursor_size"; then
+                    cursor_size="$(gsettings get org.gnome.desktop.interface cursor-size)"
+                    [ -z "$cursor_size" ] && cursor_size=24
+                    shift 2
+                else
+                    shift 3
+                fi
+                set_cursor "$cursor_theme" "$cursor_size" || exit 1
+                ;;
+            "-f"|"--font")
+                set_font "$2" || exit 1
+                shift 2
+                ;;
+            "-m"|"--monofont")
+                set_monospace_font "$2" || exit 1
+                shift 2
+                ;;
+            "-s"|"--scheme")
+                set_colorscheme "$2" || exit 1
+                shift 2
+                ;;
+            *)
+                shift 1
+                ;;
+        esac
+    done
+}
+
+main "$@"
+exit 0

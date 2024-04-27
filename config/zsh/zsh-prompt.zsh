@@ -35,7 +35,7 @@ function _prompt() {
     print -n "%{\e[${status_color}m%} %{\e[48;2;17;17;27;34m%} 󰉋 %{\e[1;38;2;187;195;223m%}${PWD/#$HOME/~}%{\e[0;38;2;17;17;27m%}%{\e[1m%}%{\e[0m%} "
 }
 
-eval "$(starship init zsh)"
+#eval "$(starship init zsh)"
 PROMPT='$(_prompt)'
 
 function set_cursor() {

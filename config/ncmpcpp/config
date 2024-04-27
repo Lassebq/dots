@@ -22,6 +22,7 @@ connected_message_on_startup = "yes"
 cyclic_scrolling = "yes"
 mouse_support = "yes"
 mouse_list_scroll_whole_page = "yes"
+seek_time = "5"
 lines_scrolled = "1"
 message_delay_time = "1"
 playlist_shorten_total_times = "yes"
@@ -49,7 +50,7 @@ progressbar_color = "black"
 
 # UI VISIBILITY
 # ---
-header_visibility = "no"
+header_visibility = "yes"
 statusbar_visibility = "yes"
 titles_visibility = "yes"
 enable_window_title = "yes"

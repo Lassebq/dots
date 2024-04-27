@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 while getopts 'lib:h' opt; do
     case "$opt" in
@@ -41,6 +41,8 @@ get_packages() {
     case "$ID" in
         arch|manjaro|artix|garuda|archcraft|endeavouros)
             pacman -Qq | wc -l;;
+        alpine)
+            apk list -I | wc -l;;
         ubuntu|debian|pop)
             echo $(("$(dpkg -l | wc -l)" - 5));;
         fedora)
@@ -205,6 +207,15 @@ logo='
     / _ | ________/ /
    / __ |/ __/ __/ _ \
   /_/ |_/_/  \__/_//_/
+';;
+alpine)
+logo_color="$blue"
+logo='
+     ___   __     _
+    / _ | / /__  (_)__  ___
+   / __ |/ / _ \/ / _ \/ -_)
+  /_/ |_/_/ .__/_/_//_/\__/
+         /_/
 ';;
 nixos)
 logo_color="$cyan"

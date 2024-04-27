@@ -1,7 +1,15 @@
+if [ "$XDG_SESSION_TYPE" = wayland ]; then
+    copy_command=(wl-copy)
+    paste_command=(wl-paste)
+elif [ "$XDG_SESSION_TYPE" = x11 ]; then
+    copy_command=(xclip -selection clipboard -i)
+    paste_command=(xclip -selection clipboard -o)
+fi
+
 function zle-clipboard-cut {
   if ((REGION_ACTIVE)); then
     zle copy-region-as-kill
-    print -rn -- $CUTBUFFER | wl-copy
+    print -rn -- $CUTBUFFER | $copy_command
     zle kill-region
   fi
 }
@@ -10,7 +18,7 @@ zle -N zle-clipboard-cut
 function zle-clipboard-copy {
   if ((REGION_ACTIVE)); then
     zle copy-region-as-kill
-    print -rn -- $CUTBUFFER | wl-copy
+    print -rn -- $CUTBUFFER | $copy_command
   else
     # Nothing is selected, so default to the interrupt command
     zle send-break
@@ -22,7 +30,7 @@ function zle-clipboard-paste {
   if ((REGION_ACTIVE)); then
     zle kill-region
   fi
-  LBUFFER+="$(wl-paste 2> /dev/null)"
+  LBUFFER+="$($paste_command 2> /dev/null)"
 }
 zle -N zle-clipboard-paste
 
@@ -44,7 +52,7 @@ for kcap    seq           widget (
     x       '^X'         zle-clipboard-cut   # `Ctrl + X`
     x       '^C'         zle-clipboard-copy  # `Ctrl + C`
 ); do
-  bindkey -M shift-select ${terminfo[$kcap]-$seq} $widget
+  bindkey -M shift-select ${terminfo[$kcap]-$seq} $widget 2> /dev/null
 done
 
 bindkey ${terminfo[x]-'^V'} zle-clipboard-paste

@@ -144,7 +144,6 @@ require("lazy").setup({
 			require("plugins.configs.ui.alpha")
 		end,
     },
-    { "tombh/novim-mode" },
 	{
 		"petertriho/nvim-scrollbar",
 		config = function()

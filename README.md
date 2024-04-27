@@ -21,9 +21,3 @@ You can clone this repo and run install.sh or run this command directly from you
 ```bash
 bash -c "$(curl https://raw.githubusercontent.com/Lassebq/dots/main/install.sh)"
 ```
-
-# Screenshots
-![image](https://cdn.discordapp.com/attachments/635625917623828520/1128678506478448640/demo1.png)
-![image](https://cdn.discordapp.com/attachments/635625917623828520/1128678506772054076/demo2.png)
-![image](https://cdn.discordapp.com/attachments/635625917623828520/1128678507019522168/demo3.png)
-![image](https://cdn.discordapp.com/attachments/635625917623828520/1128678507350864004/demo4.png)

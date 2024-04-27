@@ -1,0 +1,17 @@
+:root {
+    --toolbar-non-lwt-bgcolor: -moz-dialog !important;
+}
+
+:root,
+dialog {
+    --in-content-page-background: Background !important;
+    --in-content-primary-button-background: AccentColor !important;
+    --in-content-primary-button-background-hover: color-mix(in srgb, currentColor 12.5%, AccentColor) !important;
+    --in-content-primary-button-background-active: color-mix(in srgb, currentColor 25%, AccentColor) !important;
+    --in-content-box-border-color: ThreeDShadow !important;
+    --in-content-box-background: ActiveCaption !important;
+    --focus-outline-color: Highlight !important;
+    --in-content-page-color: CaptionText !important;
+    --in-content-table-background: ActiveCaption !important;
+    --card-outline-color: AccentColor !important;
+}

@@ -1,10 +1,4 @@
-@import url("colors.css");
+@import url("css/colors.css");
 @import url("css/leptonChrome.css");
-@import url("navbar_tabs_oneliner.css");
-@import url("hide_elements.css");
-
-:root[sizemode="normal"]:not([gtktiledwindow="true"]) {
-    body {
-        border-radius: 0px 0px env(-moz-gtk-csd-titlebar-radius) env(-moz-gtk-csd-titlebar-radius);
-    }
-}
+@import url("css/tabbar.css");
+@import url("css/hideElements.css");

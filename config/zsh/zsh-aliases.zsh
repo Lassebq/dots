@@ -13,25 +13,26 @@ lfcd() {
     fi
 }
 
-conf() {
-    case "$1" in
-        hypr)
-            "$EDITOR" "$XDG_CONFIG_HOME/hypr/hyprland.conf";;
-        river)
-            "$EDITOR" "$XDG_CONFIG_HOME/river/init";;
-        hyprbinds)
-            "$EDITOR" "$XDG_CONFIG_HOME/hypr/binds.conf";;
-        riverbinds)
-            "$EDITOR" "$XDG_CONFIG_HOME/river/binds";;
-        lfrc)
-            "$EDITOR" "$XDG_CONFIG_HOME/lf/lfrc";;
-        lf)
-            "$EDITOR" "$XDG_CONFIG_HOME/lf/previewer";;
-        lfopen)
-            "$EDITOR" "$XDG_CONFIG_HOME/lf/opener";;
-        waybar)
-            "$EDITOR" "$XDG_CONFIG_HOME/waybar/modules.jsonc";;
-    esac
+zinkrun() {
+    env __GLX_VENDOR_LIBRARY_NAME=mesa \
+        __EGL_VENDOR_LIBRARY_FILENAMES=/usr/share/glvnd/egl_vendor.d/50_mesa.json \
+        MESA_LOADER_DRIVER_OVERRIDE=zink GALLIUM_DRIVER=zink \
+        "$@"
+}
+
+softrun() {
+    # llvmpipe or softpipe
+    local driver=llvmpipe
+    env VK_DRIVER_FILES=/usr/share/vulkan/icd.d/lvp_icd.i686.json:/usr/share/vulkan/icd.d/lvp_icd.x86_64.json \
+        LIBGL_ALWAYS_SOFTWARE=1 \
+        __GLX_VENDOR_LIBRARY_NAME=mesa \
+        __EGL_VENDOR_LIBRARY_FILENAMES=/usr/share/glvnd/egl_vendor.d/50_mesa.json \
+        MESA_LOADER_DRIVER_OVERRIDE="$driver" GALLIUM_DRIVER="$driver" \
+        "$@"
+}
+
+wined3d() {
+    env WINEDLLOVERRIDES="$WINEDLLOVERRIDES;d3d9,d3d10,d3d10_1,d3d10core,d3d11,dxgi=b" "$@"
 }
 
 cpr() {
@@ -50,23 +51,35 @@ if [ "$TERM" = alacritty ] || [ "$TERM" = foot ]; then
     alias tmux="TERM=xterm-256color tmux"
 fi
 if [ "$TERM" = linux ]; then
-    export PAGER="bat -S -p --theme=base16 --color=always"
     alias lf="lfcd -config \"$XDG_CONFIG_HOME/lf/lfrc_tty\""
 else
     alias lf="lfcd"
 fi
 
-alias killall="pkill -x"
-alias icat="kitty icat"
-alias imgcat="wezterm imgcat"
+
+sudo=$(command -v sudo)
+
+if [ -z "$sudo" ]; then
+    sudo=$(command -v doas)
+fi
+
+sudoalias() {
+    alias "$1"="$sudo $1"
+}
+
+sudoalias apk
+sudoalias pacman
+sudoalias dmesg
+
+unset -f sudoalias
+unset sudo
+
+alias code="code-oss"
 alias ncmp="ncmpcpp"
-alias lfsu="sudo -E -H lf"
-alias rmpkgs="yay -Qqd | yay -Rsu -"
 alias grep="grep --color"
 alias less="$PAGER"
-alias dmesg="sudo -v; sudo dmesg --color=always | less"
 alias la="ls -A"
-alias ll="ls -alG"
-alias ls="ls --color -F --quoting-style=escape"
+alias ll="ls -al"
+alias ls="ls --color -Fh"
 alias mime="file -Lb --mime-type"
 alias trash="gio trash"

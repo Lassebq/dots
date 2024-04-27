@@ -1,11 +1,12 @@
 {
-  "window.titleBarStyle": "custom",
-  "window.title": " ",
-  "window.dialogStyle": "custom",
+  "window.titleBarStyle": "native",
+  "window.dialogStyle": "native",
   "window.commandCenter": false,
   "workbench.settings.editor": "json",
   "editor.fontFamily": "system-ui",
   "editor.smoothScrolling": true,
+  "editor.copyWithSyntaxHighlighting": false,
+  "editor.cursorSmoothCaretAnimation": "on",
   "editor.fontLigatures": true,
   "extensions.autoUpdate": false,
   "security.workspace.trust.enabled": false,
@@ -14,5 +15,10 @@
   "zenMode.centerLayout": false,
   "redhat.telemetry.enabled": false,
   "cmake.configureOnOpen": true,
-  "terminal.integrated.cursorStyle": "line"
+  "terminal.integrated.cursorStyle": "line",
+  "telemetry.telemetryLevel": "off",
+  "git.openAfterClone": "always",
+  "git.defaultBranchName": "master",
+  "cmake.options.statusBarVisibility": "compact",
+  "cmake.showOptionsMovedNotification": false
 }
