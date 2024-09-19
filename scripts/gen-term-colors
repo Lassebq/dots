@@ -17,4 +17,13 @@ case "$1" in
         dconf write /org/gnome/terminal/legacy/profiles:/:$default_profile/highlight-background-color "'$cursor_bg'"
         dconf write /org/gnome/terminal/legacy/profiles:/:$default_profile/highlight-foreground-color "'$cursor_fg'"
         ;;
+    xfce4-terminal)
+        xfconf-query -c xfce4-terminal -p /color-palette -s "$color0;$color1;$color2;$color3;$color4;$color5;$color6;$color7;$color8;$color9;$color10;$color11;$color12;$color13;$color14;$color15"
+        xfconf-query -c xfce4-terminal -p /color-background -s "$background"
+        xfconf-query -c xfce4-terminal -p /color-foreground -s "$foreground"
+        xfconf-query -c xfce4-terminal -p /color-cursor -s "$cursor_bg"
+        xfconf-query -c xfce4-terminal -p /color-cursor-foreground -s "$cursor_fg"
+        xfconf-query -c xfce4-terminal -p /color-selection-background -s "$cursor_bg"
+        xfconf-query -c xfce4-terminal -p /color-selection -s "$cursor_fg"
+        ;;
 esac

@@ -1,13 +1,8 @@
-#unified-extensions-button {
+/*#unified-extensions-button {
     width: 0px !important;
     padding: 0px !important;
     list-style-image: none !important;
-    /* display: none !important; */
-}
-
-.toolbarbutton-icon[label="Extensions"] {    
-    padding: 0px !important;
-}
+}*/
 
 .tabbrowser-tab[image="chrome://branding/content/icon32.png"] .tab-content .tab-icon-image {
     display: none !important;

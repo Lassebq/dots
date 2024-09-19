@@ -1,7 +1,4 @@
-if [ -f "$HOME/notes.txt" ]; then
-    cat "$HOME/notes.txt"
-    echo
-fi
+source ~/.profile
 
 if command -v dircolors > /dev/null; then
     eval "$(dircolors ~/.config/lf/colors)"

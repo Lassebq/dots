@@ -15,7 +15,7 @@ local opts = { silent = true, noremap = true }
 map("", "<Space>", "<Nop>", opts)
 vim.g.mapleader = " "
 
-vim.cmd("behave mswin")
+--vim.cmd("behave mswin")
 
 map("i", "<S-Delete>", "<cmd>delete<CR>", opts)
 map("s", "<C-c>", "<C-o>y", opts)

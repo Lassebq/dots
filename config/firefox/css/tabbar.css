@@ -86,6 +86,7 @@
 }
 
 #nav-bar {
+  border-style: none !important;
   width: auto !important;
 }
 

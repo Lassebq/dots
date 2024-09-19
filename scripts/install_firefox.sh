@@ -19,7 +19,8 @@ Locked=1
         git clone https://github.com/black7375/Firefox-UI-Fix.git ~/.mozilla/firefox/"$USER"/chrome
     fi
 
-    ln -sf $PWD/config/firefox/*.css ~/.mozilla/firefox/"$USER"/chrome/
+    # userChrome and userContent need to be hardlinks. Firefox resolves path of soft links
+    ln $PWD/config/firefox/*.css ~/.mozilla/firefox/"$USER"/chrome/
     ln -sf $PWD/config/firefox/css/*.css ~/.mozilla/firefox/"$USER"/chrome/css/
     ln -sf $PWD/config/firefox/user.js ~/.mozilla/firefox/"$USER"/user.js
 }

@@ -1,5 +1,6 @@
 {
   "window.titleBarStyle": "native",
+  "window.title": "${dirty}${activeEditorShort}${separator}${rootName}${separator}${profileName}${separator}${appName}",
   "window.dialogStyle": "native",
   "window.commandCenter": false,
   "workbench.settings.editor": "json",
@@ -8,7 +9,11 @@
   "editor.copyWithSyntaxHighlighting": false,
   "editor.cursorSmoothCaretAnimation": "on",
   "editor.fontLigatures": true,
+  "editor.minimap.renderCharacters": false,
+  "editor.minimap.enabled": false,
+  "editor.dragAndDrop": false,
   "extensions.autoUpdate": false,
+  "extensions.ignoreRecommendations": true,
   "security.workspace.trust.enabled": false,
   "path-intellisense.absolutePathToWorkspace": false,
   "path-intellisense.showHiddenFiles": true,
@@ -16,9 +21,14 @@
   "redhat.telemetry.enabled": false,
   "cmake.configureOnOpen": true,
   "terminal.integrated.cursorStyle": "line",
+  "terminal.integrated.showExitAlert": false,
   "telemetry.telemetryLevel": "off",
   "git.openAfterClone": "always",
-  "git.defaultBranchName": "master",
+  "git.defaultBranchName": "master",    
+  "git.openRepositoryInParentFolders": "never",
   "cmake.options.statusBarVisibility": "compact",
-  "cmake.showOptionsMovedNotification": false
+  "cmake.showOptionsMovedNotification": false,
+  "cmake.showConfigureWithDebuggerNotification": false,
+  "cmake.automaticReconfigure": true,
+  "dotnetAcquisitionExtension.enableTelemetry": false
 }

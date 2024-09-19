@@ -7,5 +7,5 @@ function set_title() {
     fi
 }
 
-autoload -Uz add-zsh-hook
-add-zsh-hook preexec set_title
+#autoload -Uz add-zsh-hook
+#add-zsh-hook preexec set_title
